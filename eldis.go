@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/vitpelekhaty/go-eldis/archive"
@@ -29,6 +30,7 @@ func WithAuth(username, password, key string) WithAuthOption {
 	}
 }
 
+// UnhandledErrorFunc обработчик появления ошибки внутри соединения с API ЭЛДИС
 type UnhandledErrorFunc func(err error)
 
 // Connection соединение с API ЭЛДИС
@@ -104,22 +106,172 @@ func (c *Connection) Connected() bool {
 
 // ListForDevelopment вызывает метод /api/v2/tv/listForDevelopment API для получения списка доступных точек учета
 func (c *Connection) ListForDevelopment() ([]byte, error) {
-	return nil, nil
+	if !c.Connected() {
+		return nil, newMethodCallError(methodListForDevelopment, "GET", errors.New("no connection"))
+	}
+
+	methodRawURL, err := join(c.rawURL, methodListForDevelopment)
+
+	if err != nil {
+		return nil, newMethodCallError(methodListForDevelopment, "GET", err)
+	}
+
+	u, err := url.Parse(methodRawURL)
+
+	if err != nil {
+		return nil, newMethodCallError(methodListForDevelopment, "GET", err)
+	}
+
+	body, err := c.call(u, "GET")
+
+	if err != nil {
+		return nil, newMethodCallError(methodListForDevelopment, "GET", err)
+	}
+
+	message, err := c.responseStatus(body)
+
+	if err != nil {
+		return nil, newMethodCallError(methodListForDevelopment, "GET", err)
+	}
+
+	if message.StatusCode != http.StatusOK {
+		return nil, newInternalError(methodListForDevelopment, "GET", message)
+	}
+
+	return body, nil
 }
 
 // UOMList вызывает метод /api/v2/uom/list API для получения списка единиц измерения
 func (c *Connection) UOMList() ([]byte, error) {
-	return nil, nil
+	if !c.Connected() {
+		return nil, newMethodCallError(methodUOMList, "GET", errors.New("no connection"))
+	}
+
+	methodRawURL, err := join(c.rawURL, methodUOMList)
+
+	if err != nil {
+		return nil, newMethodCallError(methodUOMList, "GET", err)
+	}
+
+	u, err := url.Parse(methodRawURL)
+
+	if err != nil {
+		return nil, newMethodCallError(methodUOMList, "GET", err)
+	}
+
+	body, err := c.call(u, "GET")
+
+	if err != nil {
+		return nil, newMethodCallError(methodUOMList, "GET", err)
+	}
+
+	message, err := c.responseStatus(body)
+
+	if err != nil {
+		return nil, newMethodCallError(methodUOMList, "GET", err)
+	}
+
+	if message.StatusCode != http.StatusOK {
+		return nil, newInternalError(methodUOMList, "GET", message)
+	}
+
+	return body, nil
 }
 
+// DataNormalized вызывает метод /api/v2/data/normalized для получения нормализованных (после достоверизации) показаний
+// на точке учета
 func (c *Connection) DataNormalized(regPointID string, archive archive.DataArchive, from, to RequestTime,
 	dateType DateType) ([]byte, error) {
-	return nil, nil
+	if !c.Connected() {
+		return nil, newMethodCallError(methodDataNormalized, "GET", errors.New("no connection"))
+	}
+
+	methodRawURL, err := join(c.rawURL, methodDataNormalized)
+
+	if err != nil {
+		return nil, newMethodCallError(methodDataNormalized, "GET", err)
+	}
+
+	u, err := url.Parse(methodRawURL)
+
+	if err != nil {
+		return nil, newMethodCallError(methodDataNormalized, "GET", err)
+	}
+
+	query := u.Query()
+
+	query.Add("id", regPointID)
+	query.Add("typeDataCode", strconv.Itoa(int(archive)))
+	query.Add("startDate", from.String())
+	query.Add("endDate", to.String())
+	query.Add("dateType", dateType.String())
+
+	u.RawQuery = query.Encode()
+
+	body, err := c.call(u, "GET")
+
+	if err != nil {
+		return nil, newMethodCallError(methodDataNormalized, "GET", err)
+	}
+
+	message, err := c.responseStatus(body)
+
+	if err != nil {
+		return nil, newMethodCallError(methodDataNormalized, "GET", err)
+	}
+
+	if message.StatusCode != http.StatusOK {
+		return nil, newInternalError(methodDataNormalized, "GET", message)
+	}
+
+	return body, nil
 }
 
+// RawData вызывает метод /api/v2/data/rawData для получения "сырых" показаний на точке учета
 func (c *Connection) RawData(regPointID string, archive archive.DataArchive, from,
 	to RequestTime) ([]byte, error) {
-	return nil, nil
+	if !c.Connected() {
+		return nil, newMethodCallError(methodRawData, "GET", errors.New("no connection"))
+	}
+
+	methodRawURL, err := join(c.rawURL, methodRawData)
+
+	if err != nil {
+		return nil, newMethodCallError(methodRawData, "GET", err)
+	}
+
+	u, err := url.Parse(methodRawURL)
+
+	if err != nil {
+		return nil, newMethodCallError(methodRawData, "GET", err)
+	}
+
+	query := u.Query()
+
+	query.Add("id", regPointID)
+	query.Add("typeDataCode", strconv.Itoa(int(archive)))
+	query.Add("startDate", from.String())
+	query.Add("endDate", to.String())
+
+	u.RawQuery = query.Encode()
+
+	body, err := c.call(u, "GET")
+
+	if err != nil {
+		return nil, newMethodCallError(methodRawData, "GET", err)
+	}
+
+	message, err := c.responseStatus(body)
+
+	if err != nil {
+		return nil, newMethodCallError(methodRawData, "GET", err)
+	}
+
+	if message.StatusCode != http.StatusOK {
+		return nil, newInternalError(methodRawData, "GET", message)
+	}
+
+	return body, nil
 }
 
 func (c *Connection) login() error {
@@ -187,15 +339,64 @@ func (c *Connection) login() error {
 }
 
 func (c *Connection) logout() error {
+	methodRawURL, err := join(c.rawURL, methodLogout)
+
+	if err != nil {
+		return newMethodCallError(methodLogout, "GET", err)
+	}
+
+	u, err := url.Parse(methodRawURL)
+
+	if err != nil {
+		return newMethodCallError(methodLogout, "GET", err)
+	}
+
+	body, err := c.call(u, "GET")
+
+	if err != nil {
+		return newMethodCallError(methodLogout, "GET", err)
+	}
+
+	message, err := c.responseStatus(body)
+
+	if err != nil {
+		return newMethodCallError(methodLogout, "GET", err)
+	}
+
+	if message.StatusCode != http.StatusOK {
+		return newInternalError(methodLogout, "GET", message)
+	}
+
 	return nil
 }
 
-func (c *Connection) call(u url.URL, method string) ([]byte, error) {
-	return nil, nil
-}
+func (c *Connection) call(u *url.URL, method string) ([]byte, error) {
+	req, err := http.NewRequest(method, u.String(), nil)
 
-func (c *Connection) checkConnection() error {
-	return nil
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Cookie", fmt.Sprintf("access_token=%s", c.token))
+	req.Header.Set("key", c.auth.key)
+
+	resp, err := c.client.Do(req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			c.doUnhandledError(err)
+		}
+	}()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("%d %s", resp.StatusCode, resp.Status)
+	}
+
+	return ioutil.ReadAll(resp.Body)
 }
 
 func (c *Connection) cookie(cookies []*http.Cookie, name string) (*http.Cookie, error) {
