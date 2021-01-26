@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/go-eldis/archive"
-	"github.com/go-eldis/time"
 )
 
 // ConnectionOption параметр соединения с API ЭЛДИС
@@ -73,13 +72,13 @@ func (c *Connection) UOMList() ([]byte, error) {
 	return nil, nil
 }
 
-func (c *Connection) DataNormalized(regPointID string, archive archive.DataArchive, from, to time.RequestTime,
-	dateType time.DateType) ([]byte, error) {
+func (c *Connection) DataNormalized(regPointID string, archive archive.DataArchive, from, to RequestTime,
+	dateType DateType) ([]byte, error) {
 	return nil, nil
 }
 
 func (c *Connection) RawData(regPointID string, archive archive.DataArchive, from,
-	to time.RequestTime) ([]byte, error) {
+	to RequestTime) ([]byte, error) {
 	return nil, nil
 }
 

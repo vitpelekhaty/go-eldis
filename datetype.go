@@ -1,4 +1,4 @@
-package time
+package eldis
 
 // DateType тип используемой даты для поиска данных
 type DateType byte
