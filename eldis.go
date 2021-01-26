@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/go-eldis/archive"
-	"github.com/go-eldis/response"
+	"github.com/vitpelekhaty/go-eldis/archive"
+	"github.com/vitpelekhaty/go-eldis/response"
 )
 
 // ConnectionOption параметр соединения с API ЭЛДИС

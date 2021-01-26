@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-eldis/response"
+	"github.com/vitpelekhaty/go-eldis/response"
 )
 
 // MethodCallError ошибка вызова метода API
