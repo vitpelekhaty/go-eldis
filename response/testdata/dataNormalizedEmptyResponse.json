@@ -1,0 +1,17 @@
+{
+    "response": {
+      "data": {
+        "normalized": []
+      },
+      "messages": [
+        {
+          "httpStatusCode": 200,
+          "messageCode": 4200005,
+          "messageLevel": 2,
+          "id": "",
+          "name": "",
+          "message": "Успешно"
+        }
+      ]
+    }
+}

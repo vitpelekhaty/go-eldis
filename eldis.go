@@ -427,7 +427,7 @@ func (c *Connection) responseStatus(body []byte) (*response.Message, error) {
 	messages := resp.Messages()
 
 	if len(messages) == 1 {
-		return &messages[0], nil
+		return messages[0], nil
 	}
 
 	return nil, errors.New("invalid response format")

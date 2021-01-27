@@ -10,12 +10,12 @@ type CustomResponse struct {
 	// Response данные ответа АИСКУТЭ
 	Response struct {
 		// Messages сообщения о результатах выполнения запроса к API АИСКУТЭ
-		Messages []Message `json:"messages"`
+		Messages []*Message `json:"messages"`
 	} `json:"response"`
 }
 
 // Messages возвращает сообщения о результатах выполнения запроса в АИСКУТЭ ЭЛДИС
-func (r *CustomResponse) Messages() []Message {
+func (r *CustomResponse) Messages() []*Message {
 	return r.Response.Messages
 }
 
