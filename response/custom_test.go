@@ -31,7 +31,7 @@ func TestParseCustomResponse(t *testing.T) {
 		body, err := ioutil.ReadFile(path)
 
 		if err != nil {
-			t.Errorf("%s: %q", test, err)
+			t.Fatalf("%s: %q", test, err)
 		}
 
 		resp, err := Parse(body)

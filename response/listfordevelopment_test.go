@@ -31,7 +31,7 @@ func TestParseRegPoints(t *testing.T) {
 		body, err := ioutil.ReadFile(path)
 
 		if err != nil {
-			t.Errorf("%s: %q", test.path, err)
+			t.Fatalf("%s: %q", test.path, err)
 		}
 
 		items := ParseRegPoints(body)
@@ -64,7 +64,7 @@ func TestParseRegPointsWithContext(t *testing.T) {
 	body, err := ioutil.ReadFile(path)
 
 	if err != nil {
-		t.Errorf("%s: %q", filename, err)
+		t.Fatalf("%s: %q", filename, err)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())

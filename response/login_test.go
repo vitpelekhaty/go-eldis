@@ -28,7 +28,7 @@ func TestParseLoginResponse(t *testing.T) {
 		body, err := ioutil.ReadFile(path)
 
 		if err != nil {
-			t.Errorf("%s: %q", test.path, err)
+			t.Fatalf("%s: %q", test.path, err)
 		}
 
 		resp, err := ParseLoginResponse(body)
