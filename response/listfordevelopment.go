@@ -61,20 +61,38 @@ func (rp *RegPoint) Created() time.Time {
 	return time.Unix(rp.CreatedOn, 0).UTC()
 }
 
+const (
+	listForDevelopmentPath = "response.tv.listForDevelopment"
+)
+
 // ParseRegPointsWithContext возвращает канал, в который будет записывать описания точек учета АИСКУТЭ ЭЛДИС,
 // полученных в ответе API при вызове метода /api/v2/tv/listForDevelopment.
 //
 // body - ответ указанного метода API; ctx - контекст, с помощью которого можно при необходимости остановить
 // перечисление точек учета
 //
-// Перечисление точек учета будет выполняться до полного чтения всех точек учета из ответа; до вызова функции cancel
-// отмены контекста; до первой ошибки разбора ответа метода API
+// Перечисление точек учета будет выполняться до полного чтения всех точек учета из ответа или до вызова функции cancel
+// отмены контекста
 //
 // Чтобы прочитать сообщения о результатах обработки запроса, необходимо воспользоваться методом Parse
-func ParseRegPointsWithContext(ctx context.Context, body []byte) <-chan struct {
+func ParseRegPointsWithContext(ctx context.Context, body []byte) (<-chan struct {
 	RegPoint *RegPoint
 	Err      error
-} {
+}, error) {
+	var raw []byte
+
+	listForDevelopment := gjson.GetBytes(body, listForDevelopmentPath)
+
+	if listForDevelopment.Index > 0 {
+		raw = body[listForDevelopment.Index : listForDevelopment.Index+len(listForDevelopment.Raw)]
+	} else {
+		raw = []byte(listForDevelopment.Raw)
+	}
+
+	if len(raw) == 0 {
+		return nil, &PathError{Path: listForDevelopmentPath}
+	}
+
 	out := make(chan struct {
 		RegPoint *RegPoint
 		Err      error
@@ -83,26 +101,11 @@ func ParseRegPointsWithContext(ctx context.Context, body []byte) <-chan struct {
 	go func() {
 		defer close(out)
 
-		listForDevelopment := gjson.GetBytes(body, "response.tv.listForDevelopment")
-
-		var raw []byte
-
-		if listForDevelopment.Index > 0 {
-			raw = body[listForDevelopment.Index : listForDevelopment.Index+len(listForDevelopment.Raw)]
-		} else {
-			raw = []byte(listForDevelopment.Raw)
-		}
-
 		decoder := json.NewDecoder(bytes.NewReader(raw))
 
 		_, err := decoder.Token()
 
 		if err != nil {
-			out <- struct {
-				RegPoint *RegPoint
-				Err      error
-			}{RegPoint: nil, Err: err}
-
 			return
 		}
 
@@ -127,14 +130,12 @@ func ParseRegPointsWithContext(ctx context.Context, body []byte) <-chan struct {
 						RegPoint *RegPoint
 						Err      error
 					}{RegPoint: nil, Err: err}
-
-					return
 				}
 			}
 		}
 	}()
 
-	return out
+	return out, nil
 }
 
 // ParseRegPoints возвращает канал, в который будет записывать описания точек учета АИСКУТЭ ЭЛДИС, полученных в ответе
@@ -142,13 +143,12 @@ func ParseRegPointsWithContext(ctx context.Context, body []byte) <-chan struct {
 //
 // body - ответ указанного метода API
 //
-// Перечисление точек учета будет выполняться до полного чтения всех точек учета из ответа; до первой ошибки разбора
-// ответа метода API
+// Перечисление точек учета будет выполняться до полного чтения всех точек учета из ответа
 //
 // Чтобы прочитать сообщения о результатах обработки запроса, необходимо воспользоваться методом Parse
-func ParseRegPoints(body []byte) <-chan struct {
+func ParseRegPoints(body []byte) (<-chan struct {
 	RegPoint *RegPoint
 	Err      error
-} {
+}, error) {
 	return ParseRegPointsWithContext(context.TODO(), body)
 }

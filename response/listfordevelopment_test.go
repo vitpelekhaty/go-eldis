@@ -34,7 +34,11 @@ func TestParseRegPoints(t *testing.T) {
 			t.Fatalf("%s: %q", test.path, err)
 		}
 
-		items := ParseRegPoints(body)
+		items, err := ParseRegPoints(body)
+
+		if err != nil {
+			t.Fatalf("%s: %q", test.path, err)
+		}
 
 		for item := range items {
 			if item.Err != nil {
@@ -70,7 +74,11 @@ func TestParseRegPointsWithContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	items := ParseRegPointsWithContext(ctx, body)
+	items, err := ParseRegPointsWithContext(ctx, body)
+
+	if err != nil {
+		t.Fatalf("%s: %q", filename, err)
+	}
 
 	for item := range items {
 		if item.Err != nil {
