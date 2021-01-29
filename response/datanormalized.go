@@ -323,13 +323,13 @@ type GasNormalized struct {
 }
 
 const (
-	normalizedWasteWaterPath         = "response.data.normalized.0.wasteWater"
-	normalizedColdWaterPath          = "response.data.normalized.0.coldWater"
-	normalizedHotWaterPath           = "response.data.normalized.0.hotWater"
-	normalizedHeatPath               = "response.data.normalized.0.heat"
-	normalizedElectricityPath        = "response.data.normalized.0.electricity"
-	normalizedElectricityCurrentPath = "response.data.normalized.0.electricityCurrent"
-	normalizedGasPath                = "response.data.normalized.0.gas"
+	normalizedWasteWaterPath         = "response.data.normalized.#(wasteWater).wasteWater"
+	normalizedColdWaterPath          = "response.data.normalized.#(coldWater).coldWater"
+	normalizedHotWaterPath           = "response.data.normalized.#(hotWater).hotWater"
+	normalizedHeatPath               = "response.data.normalized.#(heat).heat"
+	normalizedElectricityPath        = "response.data.normalized.#(electricity).electricity"
+	normalizedElectricityCurrentPath = "response.data.normalized.#(electricityCurrent).electricityCurrent"
+	normalizedGasPath                = "response.data.normalized.#(gas).gas"
 )
 
 // ParseWasteWaterNormalizedWithContext возвращает канал, в который будет записывать нормализованные данные по сточным
