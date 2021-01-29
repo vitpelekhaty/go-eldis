@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/guregu/null"
-	"github.com/tidwall/gjson"
 )
 
 // RegPointStatus состояние точки учета
@@ -79,18 +78,10 @@ func ParseRegPointsWithContext(ctx context.Context, body []byte) (<-chan struct 
 	RegPoint *RegPoint
 	Err      error
 }, error) {
-	var raw []byte
+	raw, err := getBytes(body, listForDevelopmentPath)
 
-	listForDevelopment := gjson.GetBytes(body, listForDevelopmentPath)
-
-	if listForDevelopment.Index > 0 {
-		raw = body[listForDevelopment.Index : listForDevelopment.Index+len(listForDevelopment.Raw)]
-	} else {
-		raw = []byte(listForDevelopment.Raw)
-	}
-
-	if len(raw) == 0 {
-		return nil, &PathError{Path: listForDevelopmentPath}
+	if err != nil {
+		return nil, err
 	}
 
 	out := make(chan struct {
@@ -98,10 +89,10 @@ func ParseRegPointsWithContext(ctx context.Context, body []byte) (<-chan struct 
 		Err      error
 	})
 
-	go func() {
+	go func(b []byte) {
 		defer close(out)
 
-		decoder := json.NewDecoder(bytes.NewReader(raw))
+		decoder := json.NewDecoder(bytes.NewReader(b))
 
 		_, err := decoder.Token()
 
@@ -133,7 +124,7 @@ func ParseRegPointsWithContext(ctx context.Context, body []byte) (<-chan struct 
 				}
 			}
 		}
-	}()
+	}(raw)
 
 	return out, nil
 }

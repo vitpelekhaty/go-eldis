@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 
 	"github.com/guregu/null"
-	"github.com/tidwall/gjson"
 )
 
 // CustomNormalized базовая структура нормализованных данных
@@ -346,18 +345,10 @@ func ParseWasteWaterNormalizedWithContext(ctx context.Context, body []byte) (<-c
 	Data *WasteWaterNormalized
 	Err  error
 }, error) {
-	var raw []byte
+	raw, err := getBytes(body, normalizedWasteWaterPath)
 
-	section := gjson.GetBytes(body, normalizedWasteWaterPath)
-
-	if section.Index > 0 {
-		raw = body[section.Index : section.Index+len(section.Raw)]
-	} else {
-		raw = []byte(section.Raw)
-	}
-
-	if len(raw) == 0 {
-		return nil, &PathError{Path: normalizedWasteWaterPath}
+	if err != nil {
+		return nil, err
 	}
 
 	out := make(chan struct {
@@ -434,18 +425,10 @@ func ParseColdWaterNormalizedWithContext(ctx context.Context, body []byte) (<-ch
 	Data *ColdWaterNormalized
 	Err  error
 }, error) {
-	var raw []byte
+	raw, err := getBytes(body, normalizedColdWaterPath)
 
-	section := gjson.GetBytes(body, normalizedColdWaterPath)
-
-	if section.Index > 0 {
-		raw = body[section.Index : section.Index+len(section.Raw)]
-	} else {
-		raw = []byte(section.Raw)
-	}
-
-	if len(raw) == 0 {
-		return nil, &PathError{Path: normalizedColdWaterPath}
+	if err != nil {
+		return nil, err
 	}
 
 	out := make(chan struct {
@@ -522,18 +505,10 @@ func ParseHotWaterNormalizedWithContext(ctx context.Context, body []byte) (<-cha
 	Data *HotWaterNormalized
 	Err  error
 }, error) {
-	var raw []byte
+	raw, err := getBytes(body, normalizedHotWaterPath)
 
-	section := gjson.GetBytes(body, normalizedHotWaterPath)
-
-	if section.Index > 0 {
-		raw = body[section.Index : section.Index+len(section.Raw)]
-	} else {
-		raw = []byte(section.Raw)
-	}
-
-	if len(raw) == 0 {
-		return nil, &PathError{Path: normalizedHotWaterPath}
+	if err != nil {
+		return nil, err
 	}
 
 	out := make(chan struct {
@@ -610,18 +585,10 @@ func ParseHeatNormalizedWithContext(ctx context.Context, body []byte) (<-chan st
 	Data *HeatNormalized
 	Err  error
 }, error) {
-	var raw []byte
+	raw, err := getBytes(body, normalizedHeatPath)
 
-	section := gjson.GetBytes(body, normalizedHeatPath)
-
-	if section.Index > 0 {
-		raw = body[section.Index : section.Index+len(section.Raw)]
-	} else {
-		raw = []byte(section.Raw)
-	}
-
-	if len(raw) == 0 {
-		return nil, &PathError{Path: normalizedHeatPath}
+	if err != nil {
+		return nil, err
 	}
 
 	out := make(chan struct {
@@ -698,18 +665,10 @@ func ParseElectricityNormalizedWithContext(ctx context.Context, body []byte) (<-
 	Data *ElectricityNormalized
 	Err  error
 }, error) {
-	var raw []byte
+	raw, err := getBytes(body, normalizedElectricityPath)
 
-	section := gjson.GetBytes(body, normalizedElectricityPath)
-
-	if section.Index > 0 {
-		raw = body[section.Index : section.Index+len(section.Raw)]
-	} else {
-		raw = []byte(section.Raw)
-	}
-
-	if len(raw) == 0 {
-		return nil, &PathError{Path: normalizedElectricityPath}
+	if err != nil {
+		return nil, err
 	}
 
 	out := make(chan struct {
@@ -791,18 +750,10 @@ func ParseElectricityCurrentNormalizedWithContext(ctx context.Context, body []by
 	Data *ElectricityCurrentNormalized
 	Err  error
 }, error) {
-	var raw []byte
+	raw, err := getBytes(body, normalizedElectricityCurrentPath)
 
-	section := gjson.GetBytes(body, normalizedElectricityCurrentPath)
-
-	if section.Index > 0 {
-		raw = body[section.Index : section.Index+len(section.Raw)]
-	} else {
-		raw = []byte(section.Raw)
-	}
-
-	if len(raw) == 0 {
-		return nil, &PathError{Path: normalizedElectricityCurrentPath}
+	if err != nil {
+		return nil, err
 	}
 
 	out := make(chan struct {
@@ -879,18 +830,10 @@ func ParseGasNormalizedWithContext(ctx context.Context, body []byte) (<-chan str
 	Data *GasNormalized
 	Err  error
 }, error) {
-	var raw []byte
+	raw, err := getBytes(body, normalizedGasPath)
 
-	section := gjson.GetBytes(body, normalizedGasPath)
-
-	if section.Index > 0 {
-		raw = body[section.Index : section.Index+len(section.Raw)]
-	} else {
-		raw = []byte(section.Raw)
-	}
-
-	if len(raw) == 0 {
-		return nil, &PathError{Path: normalizedGasPath}
+	if err != nil {
+		return nil, err
 	}
 
 	out := make(chan struct {
