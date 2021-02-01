@@ -128,7 +128,7 @@ func TestParseHotWaterNormalizedWithContext(t *testing.T) {
 		}
 
 		if test.count != count {
-			t.Errorf("%s: %d point(s), but %d point(s) expected (broken test?)", test.path, count, test.count)
+			t.Errorf("%s: %d item(s), but %d item(s) expected (broken test?)", test.path, count, test.count)
 		}
 	}
 }
@@ -218,7 +218,7 @@ func TestParseHeatNormalizedWithContext(t *testing.T) {
 		}
 
 		if test.count != count {
-			t.Errorf("%s: %d point(s), but %d point(s) expected (broken test?)", test.path, count, test.count)
+			t.Errorf("%s: %d item(s), but %d item(s) expected (broken test?)", test.path, count, test.count)
 		}
 	}
 }

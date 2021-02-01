@@ -26,6 +26,8 @@ const (
 	SectionNormalizedElectricityCurrentData
 	// SectionNormalizedGasData раздел нормализованных показаний по газу
 	SectionNormalizedGasData
+	// SectionUoM раздел групп справочников единиц измерений
+	SectionUoM
 )
 
 // Get извлекает из тела body ответа метода API ЭЛДИС содержимое указанного раздела section. Если ответ не содержит
@@ -48,6 +50,8 @@ func Get(section Section, body []byte) ([]byte, error) {
 		return getBytes(body, normalizedElectricityCurrentPath)
 	case SectionNormalizedGasData:
 		return getBytes(body, normalizedGasPath)
+	case SectionUoM:
+		return getBytes(body, uomPath)
 	default:
 		return nil, errors.New("unavailable for this section")
 	}

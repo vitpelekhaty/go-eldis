@@ -166,3 +166,31 @@ func TestGetListForDevelopmentBytes(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestGetUoMGroupBytes(t *testing.T) {
+	const filename = "/testdata/uomlistResponse.json"
+
+	_, file, _, ok := runtime.Caller(0)
+
+	if !ok {
+		t.Fatal(errors.New("runtime.Caller error"))
+	}
+
+	path := filepath.Join(filepath.Dir(file), filename)
+
+	body, err := ioutil.ReadFile(path)
+
+	if err != nil {
+		t.Errorf("%s: %q", filename, err)
+	}
+
+	b, err := getBytes(body, uomPath)
+
+	if err != nil {
+		t.Fatalf("%s: %q", filename, err)
+	}
+
+	if len(b) == 0 {
+		t.Fail()
+	}
+}
