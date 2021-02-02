@@ -98,3 +98,68 @@ func TestParseUoMGroupsWithCancel(t *testing.T) {
 		t.Errorf("%s: %d step(s), you cannot stop me", filename, count)
 	}
 }
+
+func TestParseUoMGroups(t *testing.T) {
+	var cases = [1]struct {
+		path  string
+		count int
+	}{
+		{path: "/testdata/uomlistResponse.json", count: 20},
+	}
+
+	_, file, _, ok := runtime.Caller(0)
+
+	if !ok {
+		t.Fatal(errors.New("runtime.Caller error"))
+	}
+
+	for _, test := range cases {
+		count := 0
+
+		path := filepath.Join(filepath.Dir(file), test.path)
+
+		body, err := ioutil.ReadFile(path)
+
+		if err != nil {
+			t.Fatalf("%s: %q", test.path, err)
+		}
+
+		items, err := ParseUoMGroups(body)
+
+		if err != nil {
+			t.Fatalf("%s: %q", test.path, err)
+		}
+
+		for item := range items {
+			if item.Err != nil {
+				t.Errorf("%s: %q", test.path, err)
+			} else {
+				count++
+			}
+		}
+
+		if test.count != count {
+			t.Errorf("%s: %d group(s), but %d group(s) expected (broken test?)", test.path, count, test.count)
+		}
+	}
+}
+
+func TestParseUoMGroupsWithEmptyBody(t *testing.T) {
+	var body []byte
+
+	t.Run("ParseUoMGroupsWithContext.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseUoMGroupsWithContext(context.TODO(), body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("ParseUoMGroups.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseUoMGroups(body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
+}

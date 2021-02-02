@@ -45,3 +45,13 @@ func TestParseCustomResponse(t *testing.T) {
 		}
 	}
 }
+
+func TestParseEmptyCustomResponse(t *testing.T) {
+	var body []byte
+
+	_, err := Parse(body)
+
+	if err != errEmptyBody {
+		t.Fatal("errEmptyBody error expected")
+	}
+}

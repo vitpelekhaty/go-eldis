@@ -52,6 +52,16 @@ func TestRawValue(t *testing.T) {
 		}
 	})
 
+	t.Run("RawValue.AsInt64.WithError", func(t *testing.T) {
+		raw := RawValue(stringValue)
+
+		i, _ := raw.AsInt()
+
+		if i != -1 {
+			t.Fail()
+		}
+	})
+
 	t.Run("RawValue.AsFloat", func(t *testing.T) {
 		value := strconv.FormatFloat(floatValue, 'f', -1, 64)
 		raw := RawValue(value)
@@ -188,4 +198,69 @@ func TestParseRawDataWithCancel(t *testing.T) {
 	if !(count < expectedCount) {
 		t.Errorf("%s: %d step(s), you cannot stop me", filename, count)
 	}
+}
+
+func TestParseRawData(t *testing.T) {
+	var cases = [1]struct {
+		path  string
+		count int
+	}{
+		{path: "/testdata/rawDataResponse.json", count: 120},
+	}
+
+	_, file, _, ok := runtime.Caller(0)
+
+	if !ok {
+		t.Fatal(errors.New("runtime.Caller error"))
+	}
+
+	for _, test := range cases {
+		count := 0
+
+		path := filepath.Join(filepath.Dir(file), test.path)
+
+		body, err := ioutil.ReadFile(path)
+
+		if err != nil {
+			t.Fatalf("%s: %q", test.path, err)
+		}
+
+		items, err := ParseRawData(body)
+
+		if err != nil {
+			t.Fatalf("%s: %q", test.path, err)
+		}
+
+		for item := range items {
+			if item.Err != nil {
+				t.Errorf("%s: %q", test.path, err)
+			} else {
+				count++
+			}
+		}
+
+		if test.count != count {
+			t.Errorf("%s: %d item(s), but %d item(s) expected (broken test?)", test.path, count, test.count)
+		}
+	}
+}
+
+func TestParseRawDataWithEmptyBody(t *testing.T) {
+	var body []byte
+
+	t.Run("ParseRawDataWithContext.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseRawDataWithContext(context.TODO(), body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("ParseRawData.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseRawData(body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
 }

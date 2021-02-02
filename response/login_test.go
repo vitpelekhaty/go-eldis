@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestParseLoginResponse(t *testing.T) {
+func TestParseLoginResponse_Result(t *testing.T) {
 	var cases = [1]struct {
 		path       string
 		wantResult bool
@@ -40,5 +40,44 @@ func TestParseLoginResponse(t *testing.T) {
 		if resp.Result() != test.wantResult {
 			t.Errorf("%s: broken test (?)", test.path)
 		}
+	}
+}
+
+func TestParseLoginResponse_Messages(t *testing.T) {
+	var paths = [1]string{"/testdata/loginResponse.json"}
+
+	_, file, _, ok := runtime.Caller(0)
+
+	if !ok {
+		t.Fatal(errors.New("runtime.Caller error"))
+	}
+
+	for _, p := range paths {
+		path := filepath.Join(filepath.Dir(file), p)
+
+		body, err := ioutil.ReadFile(path)
+
+		if err != nil {
+			t.Fatalf("%s: %q", p, err)
+		}
+
+		resp, err := ParseLoginResponse(body)
+
+		if err != nil {
+			t.Errorf("%s: %q", p, err)
+		}
+
+		if len(resp.Messages()) != 1 {
+			t.Errorf("%s: invalid response format", p)
+		}
+	}
+}
+
+func TestParseLoginResponseWithEmptyBody(t *testing.T) {
+	var body []byte
+	_, err := ParseLoginResponse(body)
+
+	if err != errEmptyBody {
+		t.Error("errEmptyBody error expected")
 	}
 }

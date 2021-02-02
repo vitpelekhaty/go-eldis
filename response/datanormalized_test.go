@@ -3,14 +3,13 @@ package response
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"runtime"
 	"testing"
 )
 
-func TestParseNormalizedEmptyData(t *testing.T) {
+func TestParseNormalizedWithEmptyNode(t *testing.T) {
 	const filename = "/testdata/dataNormalizedEmptyResponse.json"
 
 	_, file, _, ok := runtime.Caller(0)
@@ -29,7 +28,7 @@ func TestParseNormalizedEmptyData(t *testing.T) {
 
 	ctx := context.TODO()
 
-	t.Run(fmt.Sprintf("empty.%s", normalizedWasteWaterPath), func(t *testing.T) {
+	t.Run("ParseWasteWaterNormalizedWithContext.WithEmptyNode", func(t *testing.T) {
 		_, err := ParseWasteWaterNormalizedWithContext(ctx, body)
 
 		if _, ok := err.(*PathError); !ok {
@@ -37,7 +36,15 @@ func TestParseNormalizedEmptyData(t *testing.T) {
 		}
 	})
 
-	t.Run(fmt.Sprintf("empty.%s", normalizedColdWaterPath), func(t *testing.T) {
+	t.Run("ParseWasteWaterNormalized.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseWasteWaterNormalized(body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseColdWaterNormalizedWithContext.WithEmptyNode", func(t *testing.T) {
 		_, err := ParseColdWaterNormalizedWithContext(ctx, body)
 
 		if _, ok := err.(*PathError); !ok {
@@ -45,7 +52,15 @@ func TestParseNormalizedEmptyData(t *testing.T) {
 		}
 	})
 
-	t.Run(fmt.Sprintf("empty.%s", normalizedHotWaterPath), func(t *testing.T) {
+	t.Run("ParseColdWaterNormalized.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseColdWaterNormalized(body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseHotWaterNormalizedWithContext.WithEmptyNode", func(t *testing.T) {
 		_, err := ParseHotWaterNormalizedWithContext(ctx, body)
 
 		if _, ok := err.(*PathError); !ok {
@@ -53,7 +68,15 @@ func TestParseNormalizedEmptyData(t *testing.T) {
 		}
 	})
 
-	t.Run(fmt.Sprintf("empty.%s", normalizedHeatPath), func(t *testing.T) {
+	t.Run("ParseHotWaterNormalized.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseHotWaterNormalized(body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseHeatNormalizedWithContext.WithEmptyNode", func(t *testing.T) {
 		_, err := ParseHeatNormalizedWithContext(ctx, body)
 
 		if _, ok := err.(*PathError); !ok {
@@ -61,7 +84,15 @@ func TestParseNormalizedEmptyData(t *testing.T) {
 		}
 	})
 
-	t.Run(fmt.Sprintf("empty.%s", normalizedElectricityPath), func(t *testing.T) {
+	t.Run("ParseHeatNormalized.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseHeatNormalized(body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseElectricityNormalizedWithContext.WithEmptyNode", func(t *testing.T) {
 		_, err := ParseElectricityNormalizedWithContext(ctx, body)
 
 		if _, ok := err.(*PathError); !ok {
@@ -69,7 +100,15 @@ func TestParseNormalizedEmptyData(t *testing.T) {
 		}
 	})
 
-	t.Run(fmt.Sprintf("empty.%s", normalizedElectricityCurrentPath), func(t *testing.T) {
+	t.Run("ParseElectricityNormalized.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseElectricityNormalized(body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseElectricityCurrentNormalizedWithContext.WithEmptyNode", func(t *testing.T) {
 		_, err := ParseElectricityCurrentNormalizedWithContext(ctx, body)
 
 		if _, ok := err.(*PathError); !ok {
@@ -77,11 +116,144 @@ func TestParseNormalizedEmptyData(t *testing.T) {
 		}
 	})
 
-	t.Run(fmt.Sprintf("empty.%s", normalizedGasPath), func(t *testing.T) {
+	t.Run("ParseElectricityCurrentNormalized.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseElectricityCurrentNormalized(body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseGasNormalizedWithContext.WithEmptyNode", func(t *testing.T) {
 		_, err := ParseGasNormalizedWithContext(ctx, body)
 
 		if _, ok := err.(*PathError); !ok {
 			t.Fail()
+		}
+	})
+
+	t.Run("ParseGasNormalized.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseGasNormalized(body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+}
+
+func TestParseNormalizedWithEmptyBody(t *testing.T) {
+	var body []byte
+	ctx := context.TODO()
+
+	t.Run("ParseWasteWaterNormalizedWithContext.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseWasteWaterNormalizedWithContext(ctx, body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("ParseWasteWaterNormalized.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseWasteWaterNormalized(body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("ParseColdWaterNormalizedWithContext.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseColdWaterNormalizedWithContext(ctx, body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("ParseColdWaterNormalized.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseColdWaterNormalized(body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("ParseHotWaterNormalizedWithContext.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseHotWaterNormalizedWithContext(ctx, body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("ParseHotWaterNormalized.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseHotWaterNormalized(body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("ParseHeatNormalizedWithContext.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseHeatNormalizedWithContext(ctx, body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("ParseHeatNormalized.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseHeatNormalized(body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("ParseElectricityNormalizedWithContext.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseElectricityNormalizedWithContext(ctx, body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("ParseElectricityNormalized.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseElectricityNormalized(body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("ParseElectricityCurrentNormalizedWithContext.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseElectricityCurrentNormalizedWithContext(ctx, body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("ParseElectricityCurrentNormalized.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseElectricityCurrentNormalized(body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("ParseGasNormalizedWithContext.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseGasNormalizedWithContext(ctx, body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("ParseGasNormalized.WithEmptyBody", func(t *testing.T) {
+		_, err := ParseGasNormalized(body)
+
+		if err != errEmptyBody {
+			t.Error("errEmptyBody error expected")
 		}
 	})
 }
@@ -176,6 +348,51 @@ func TestParseHotWaterNormalizedWithCancel(t *testing.T) {
 	}
 }
 
+func TestParseHotWaterNormalized(t *testing.T) {
+	var cases = [1]struct {
+		path  string
+		count int
+	}{
+		{path: "/testdata/dataNormalizedResponse.json", count: 120},
+	}
+
+	_, file, _, ok := runtime.Caller(0)
+
+	if !ok {
+		t.Fatal(errors.New("runtime.Caller error"))
+	}
+
+	for _, test := range cases {
+		count := 0
+
+		path := filepath.Join(filepath.Dir(file), test.path)
+
+		body, err := ioutil.ReadFile(path)
+
+		if err != nil {
+			t.Fatalf("%s: %q", test.path, err)
+		}
+
+		items, err := ParseHotWaterNormalized(body)
+
+		if err != nil {
+			t.Fatalf("%s: %q", test.path, err)
+		}
+
+		for item := range items {
+			if item.Err != nil {
+				t.Errorf("%s: %q", test.path, err)
+			} else {
+				count++
+			}
+		}
+
+		if test.count != count {
+			t.Errorf("%s: %d item(s), but %d item(s) expected (broken test?)", test.path, count, test.count)
+		}
+	}
+}
+
 func TestParseHeatNormalizedWithContext(t *testing.T) {
 	var cases = [1]struct {
 		path  string
@@ -263,5 +480,50 @@ func TestParseHeatNormalizedWithCancel(t *testing.T) {
 
 	if !(count < expectedCount) {
 		t.Errorf("%s: %d step(s), you cannot stop me", filename, count)
+	}
+}
+
+func TestParseHeatNormalized(t *testing.T) {
+	var cases = [1]struct {
+		path  string
+		count int
+	}{
+		{path: "/testdata/dataNormalizedResponse.json", count: 120},
+	}
+
+	_, file, _, ok := runtime.Caller(0)
+
+	if !ok {
+		t.Fatal(errors.New("runtime.Caller error"))
+	}
+
+	for _, test := range cases {
+		count := 0
+
+		path := filepath.Join(filepath.Dir(file), test.path)
+
+		body, err := ioutil.ReadFile(path)
+
+		if err != nil {
+			t.Fatalf("%s: %q", test.path, err)
+		}
+
+		items, err := ParseHeatNormalized(body)
+
+		if err != nil {
+			t.Fatalf("%s: %q", test.path, err)
+		}
+
+		for item := range items {
+			if item.Err != nil {
+				t.Errorf("%s: %q", test.path, err)
+			} else {
+				count++
+			}
+		}
+
+		if test.count != count {
+			t.Errorf("%s: %d item(s), but %d item(s) expected (broken test?)", test.path, count, test.count)
+		}
 	}
 }

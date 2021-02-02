@@ -2,7 +2,6 @@ package response
 
 import (
 	"encoding/json"
-	"errors"
 )
 
 // LoginResponse ответ метода api/v2/users/login
@@ -31,7 +30,7 @@ func (r *LoginResponse) Messages() []Message {
 // ParseLoginResponse возвращает результат разбора ответа метода /api/v2/users/login
 func ParseLoginResponse(body []byte) (*LoginResponse, error) {
 	if len(body) == 0 {
-		return nil, errors.New("no data")
+		return nil, errEmptyBody
 	}
 
 	var resp LoginResponse

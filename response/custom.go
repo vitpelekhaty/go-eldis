@@ -2,7 +2,6 @@ package response
 
 import (
 	"encoding/json"
-	"errors"
 )
 
 // CustomResponse базовый ответ АИСКУТЭ ЭЛДИС
@@ -22,7 +21,7 @@ func (r *CustomResponse) Messages() []*Message {
 // Parse возвращает результат разбора базового ответа АИСКУТЭ ЭЛДИС
 func Parse(body []byte) (*CustomResponse, error) {
 	if len(body) == 0 {
-		return nil, errors.New("no data")
+		return nil, errEmptyBody
 	}
 
 	var resp CustomResponse

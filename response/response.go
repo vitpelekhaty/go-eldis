@@ -1,8 +1,6 @@
 package response
 
 import (
-	"errors"
-
 	"github.com/tidwall/gjson"
 )
 
@@ -57,11 +55,15 @@ func Get(section Section, body []byte) ([]byte, error) {
 	case SectionRawData:
 		return getBytes(body, rawDataPath)
 	default:
-		return nil, errors.New("unavailable for this section")
+		return nil, errUnavailableForSection
 	}
 }
 
 func getBytes(body []byte, path string) ([]byte, error) {
+	if len(body) == 0 {
+		return nil, errEmptyBody
+	}
+
 	var raw []byte
 
 	section := gjson.GetBytes(body, path)

@@ -2,7 +2,6 @@ package response
 
 import (
 	"encoding/json"
-	"errors"
 )
 
 // LogoutResponse ответ метода api/v2/users/logout
@@ -31,7 +30,7 @@ func (r *LogoutResponse) Messages() []Message {
 // ParseLogoutResponse возвращает результат разбора ответа метода /api/v2/users/logout
 func ParseLogoutResponse(body []byte) (*LogoutResponse, error) {
 	if len(body) == 0 {
-		return nil, errors.New("no data")
+		return nil, errEmptyBody
 	}
 
 	var resp LogoutResponse
