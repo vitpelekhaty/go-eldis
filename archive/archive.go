@@ -28,30 +28,71 @@ const (
 	CurrentArchived DataArchive = 30023
 )
 
+const (
+	strCurrentValues      = "CurrentValues"
+	strMinuteArchive      = "MinuteArchive"
+	strHourArchive        = "HourArchive"
+	strDailyArchive       = "DailyArchive"
+	strMonthLongArchive   = "MonthLongArchive"
+	strTotalCurrentValues = "TotalCurrentValues"
+	strIntervalArchive    = "IntervalArchive"
+	strHalfHourArchive    = "HalfHourArchive"
+	strDecadeArchive      = "DecadeArchive"
+	strCurrentArchived    = "CurrentArchived"
+)
+
 // String возвращает строковое представление значения типа архива показаний
 func (a DataArchive) String() string {
 	switch a {
 	case CurrentValues:
-		return "CurrentValues"
+		return strCurrentValues
 	case MinuteArchive:
-		return "MinuteArchive"
+		return strMinuteArchive
 	case HourArchive:
-		return "HourArchive"
+		return strHourArchive
 	case DailyArchive:
-		return "DailyArchive"
+		return strDailyArchive
 	case MonthLongArchive:
-		return "MonthLongArchive"
+		return strMonthLongArchive
 	case TotalCurrentValues:
-		return "TotalCurrentValues"
+		return strTotalCurrentValues
 	case IntervalArchive:
-		return "IntervalArchive"
+		return strIntervalArchive
 	case HalfHourArchive:
-		return "HalfHourArchive"
+		return strHalfHourArchive
 	case DecadeArchive:
-		return "DecadeArchive"
+		return strDecadeArchive
 	case CurrentArchived:
-		return "CurrentArchived"
+		return strCurrentArchived
 	default:
-		return "UnknownArchive"
+		return ""
+	}
+}
+
+// Parse возвращает значение типа DataArchive, соответствующее значению строки s
+func Parse(s string) (DataArchive, error) {
+	switch s {
+	case strCurrentValues:
+		return CurrentValues, nil
+	case strMinuteArchive:
+		return MinuteArchive, nil
+	case strHourArchive:
+		return HourArchive, nil
+	case strDailyArchive:
+		return DailyArchive, nil
+	case strMonthLongArchive:
+		return MonthLongArchive, nil
+	case strTotalCurrentValues:
+		return TotalCurrentValues, nil
+	case strIntervalArchive:
+		return IntervalArchive, nil
+	case strHalfHourArchive:
+		return HalfHourArchive, nil
+	case strDecadeArchive:
+		return DecadeArchive, nil
+	case strCurrentArchived:
+		return CurrentArchived, nil
+	default:
+		return UnknownArchive, &ErrorUnknownArchive{Value: s}
 	}
 }
