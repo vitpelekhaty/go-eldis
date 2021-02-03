@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/vitpelekhaty/go-eldis/archive"
+	"github.com/vitpelekhaty/go-eldis/date"
 	"github.com/vitpelekhaty/go-eldis/response"
 )
 
@@ -181,7 +182,7 @@ func (c *Connection) UOMList() ([]byte, error) {
 // DataNormalized вызывает метод /api/v2/data/normalized для получения нормализованных (после достоверизации) показаний
 // на точке учета
 func (c *Connection) DataNormalized(regPointID string, archive archive.DataArchive, from, to RequestTime,
-	dateType DateType) ([]byte, error) {
+	dateType date.Type) ([]byte, error) {
 	if !c.Connected() {
 		return nil, newMethodCallError(methodDataNormalized, "GET", errors.New("no connection"))
 	}
