@@ -3,6 +3,7 @@
 package eldis
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"flag"
@@ -14,6 +15,10 @@ import (
 	"time"
 
 	"github.com/vitpelekhaty/httptracer"
+
+	"github.com/vitpelekhaty/go-eldis/archive"
+	"github.com/vitpelekhaty/go-eldis/date"
+	"github.com/vitpelekhaty/go-eldis/response"
 )
 
 var (
@@ -48,11 +53,9 @@ func init() {
 	flag.StringVar(&strDateType, "date", "date", "type of date (for DataNormalized())")
 }
 
-/*
 const (
 	layoutQuery = `02.01.2006 15:04`
 )
-*/
 
 func TestConnection_RawData(t *testing.T) {
 	_, err := url.Parse(rawURL)
@@ -60,25 +63,25 @@ func TestConnection_RawData(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	/*
-		start, err := time.Parse(layoutQuery, strStart)
 
-		if err != nil {
-			t.Fatal(err)
-		}
+	start, err := time.Parse(layoutQuery, strStart)
 
-		end, err := time.Parse(layoutQuery, strEnd)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-		if err != nil {
-			t.Fatal(err)
-		}
+	end, err := time.Parse(layoutQuery, strEnd)
 
-		archiveType, err := archive.Parse(strDataArchive)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-		if err != nil {
-			t.Fatal(err)
-		}
-	*/
+	archiveType, err := archive.Parse(strDataArchive)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	timeout, err := time.ParseDuration(strTimeout)
 
 	if err != nil {
@@ -181,60 +184,56 @@ func TestConnection_RawData(t *testing.T) {
 		t.Fatal("ListForDevelopment() error: empty body")
 	}
 
-	/*
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-		points, err := response.ParseRegPointsWithContext(ctx, p)
+	points, err := response.ParseRegPointsWithContext(ctx, p)
 
-		if err != nil {
-			t.Fatalf("ParseRawDataWithContext() error: %q", err)
-		}
+	if err != nil {
+		t.Fatalf("ParseRegPointsWithContext() error: %q", err)
+	}
 
-		var pointCount int
+	var pointCount int
 
-		for point := range points {
-			if point.Err != nil {
-				t.Error(point.Err)
-
-				pointCount++
-
-				continue
-			}
-
-			if limit > 0 && pointCount > int(limit) {
-				cancel()
-			}
-
-			regPoint := point.RegPoint
-
-			t.Logf("RawData() for point %s (sensor %s %s)", regPoint.ID, regPoint.DeviceName, regPoint.SN)
-
-			d, err := c.RawData(point.RegPoint.ID, archiveType, RequestTime(start), RequestTime(end))
-
-			if err != nil {
-				t.Errorf("RawData() error: %q", err)
-
-				pointCount++
-
-				continue
-			}
-
-			if len(d) == 0 {
-				t.Error("RawData() error: empty body")
-
-				pointCount++
-
-				continue
-			}
+	for point := range points {
+		if point.Err != nil {
+			t.Error(point.Err)
 
 			pointCount++
+
+			continue
 		}
 
-	*/
+		if limit > 0 && pointCount > int(limit) {
+			cancel()
+		}
+
+		regPoint := point.RegPoint
+
+		t.Logf("RawData() for point %s (sensor %s %s)", regPoint.ID, regPoint.DeviceName, regPoint.SN)
+
+		d, err := c.RawData(point.RegPoint.ID, archiveType, RequestTime(start), RequestTime(end))
+
+		if err != nil {
+			t.Errorf("RawData() error: %q", err)
+
+			pointCount++
+
+			continue
+		}
+
+		if len(d) == 0 {
+			t.Error("RawData() error: empty body")
+
+			pointCount++
+
+			continue
+		}
+
+		pointCount++
+	}
 }
 
-/*
 func TestConnection_DataNormalized(t *testing.T) {
 	_, err := url.Parse(rawURL)
 
@@ -374,7 +373,7 @@ func TestConnection_DataNormalized(t *testing.T) {
 	points, err := response.ParseRegPointsWithContext(ctx, p)
 
 	if err != nil {
-		t.Fatalf("ParseRawDataWithContext() error: %q", err)
+		t.Fatalf("ParseRegPointsWithContext() error: %q", err)
 	}
 
 	var pointCount int
@@ -394,12 +393,12 @@ func TestConnection_DataNormalized(t *testing.T) {
 
 		regPoint := point.RegPoint
 
-		t.Logf("RawData() for point %s (sensor %s %s)", regPoint.ID, regPoint.DeviceName, regPoint.SN)
+		t.Logf("DataNormalized() for point %s (sensor %s %s)", regPoint.ID, regPoint.DeviceName, regPoint.SN)
 
 		d, err := c.DataNormalized(point.RegPoint.ID, archiveType, RequestTime(start), RequestTime(end), dateType)
 
 		if err != nil {
-			t.Errorf("RawData() error: %q", err)
+			t.Errorf("DataNormalized() error: %q", err)
 
 			pointCount++
 
@@ -417,7 +416,6 @@ func TestConnection_DataNormalized(t *testing.T) {
 		pointCount++
 	}
 }
-*/
 
 func setupHTTPClient(timeout time.Duration, insecureSkipVerify bool) *http.Client {
 	client := &http.Client{
