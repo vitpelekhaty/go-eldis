@@ -427,11 +427,11 @@ func (c *Connection) responseStatus(body []byte) (*response.Message, error) {
 
 	messages := resp.Messages()
 
-	if len(messages) == 1 {
-		return messages[0], nil
+	if len(messages) == 0 {
+		return &response.Message{StatusCode: http.StatusOK, Message: "Success"}, nil
 	}
 
-	return nil, errors.New("invalid response format")
+	return messages[0], nil
 }
 
 func (c *Connection) doUnhandledError(err error) {

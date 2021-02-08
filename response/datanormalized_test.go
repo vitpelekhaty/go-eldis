@@ -141,6 +141,138 @@ func TestParseNormalizedWithEmptyNode(t *testing.T) {
 	})
 }
 
+func TestParseNormalizedWithEmptyNode2(t *testing.T) {
+	const filename = "/testdata/empty.json"
+
+	_, file, _, ok := runtime.Caller(0)
+
+	if !ok {
+		t.Fatal(errors.New("runtime.Caller error"))
+	}
+
+	path := filepath.Join(filepath.Dir(file), filename)
+
+	body, err := ioutil.ReadFile(path)
+
+	if err != nil {
+		t.Errorf("%s: %q", filename, err)
+	}
+
+	ctx := context.TODO()
+
+	t.Run("ParseWasteWaterNormalizedWithContext.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseWasteWaterNormalizedWithContext(ctx, body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseWasteWaterNormalized.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseWasteWaterNormalized(body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseColdWaterNormalizedWithContext.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseColdWaterNormalizedWithContext(ctx, body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseColdWaterNormalized.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseColdWaterNormalized(body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseHotWaterNormalizedWithContext.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseHotWaterNormalizedWithContext(ctx, body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseHotWaterNormalized.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseHotWaterNormalized(body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseHeatNormalizedWithContext.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseHeatNormalizedWithContext(ctx, body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseHeatNormalized.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseHeatNormalized(body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseElectricityNormalizedWithContext.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseElectricityNormalizedWithContext(ctx, body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseElectricityNormalized.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseElectricityNormalized(body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseElectricityCurrentNormalizedWithContext.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseElectricityCurrentNormalizedWithContext(ctx, body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseElectricityCurrentNormalized.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseElectricityCurrentNormalized(body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseGasNormalizedWithContext.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseGasNormalizedWithContext(ctx, body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseGasNormalized.WithEmptyNode", func(t *testing.T) {
+		_, err := ParseGasNormalized(body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+}
+
 func TestParseNormalizedWithEmptyBody(t *testing.T) {
 	var body []byte
 	ctx := context.TODO()

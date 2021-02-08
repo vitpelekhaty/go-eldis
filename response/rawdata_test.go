@@ -264,3 +264,23 @@ func TestParseRawDataWithEmptyBody(t *testing.T) {
 		}
 	})
 }
+
+func TestParseRawDataWithEmptyBody2(t *testing.T) {
+	var body = []byte("{}")
+
+	t.Run("ParseRawDataWithContext.WithEmptyResponse", func(t *testing.T) {
+		_, err := ParseRawDataWithContext(context.TODO(), body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("ParseRawData.WithEmptyResponse", func(t *testing.T) {
+		_, err := ParseRawData(body)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+}

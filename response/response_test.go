@@ -281,6 +281,98 @@ func TestGetBytesWithEmptyBody(t *testing.T) {
 			t.Fail()
 		}
 	})
+
+	t.Run(fmt.Sprintf("empty.%s", listForDevelopmentPath), func(t *testing.T) {
+		_, err := getBytes(body, listForDevelopmentPath)
+
+		if err != errEmptyBody {
+			t.Fail()
+		}
+	})
+
+	t.Run(fmt.Sprintf("empty.%s", uomPath), func(t *testing.T) {
+		_, err := getBytes(body, uomPath)
+
+		if err != errEmptyBody {
+			t.Fail()
+		}
+	})
+}
+
+func TestGetBytesWithEmptyResponse(t *testing.T) {
+	var body = []byte("{}")
+
+	t.Run(fmt.Sprintf("emptyResponse.%s", normalizedWasteWaterPath), func(t *testing.T) {
+		_, err := getBytes(body, normalizedWasteWaterPath)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run(fmt.Sprintf("emptyResponse.%s", normalizedColdWaterPath), func(t *testing.T) {
+		_, err := getBytes(body, normalizedWasteWaterPath)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run(fmt.Sprintf("emptyResponse.%s", normalizedHotWaterPath), func(t *testing.T) {
+		_, err := getBytes(body, normalizedWasteWaterPath)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run(fmt.Sprintf("emptyResponse.%s", normalizedHeatPath), func(t *testing.T) {
+		_, err := getBytes(body, normalizedHeatPath)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run(fmt.Sprintf("emptyResponse.%s", normalizedElectricityPath), func(t *testing.T) {
+		_, err := getBytes(body, normalizedElectricityPath)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run(fmt.Sprintf("emptyResponse.%s", normalizedElectricityCurrentPath), func(t *testing.T) {
+		_, err := getBytes(body, normalizedElectricityCurrentPath)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run(fmt.Sprintf("emptyResponse.%s", normalizedGasPath), func(t *testing.T) {
+		_, err := getBytes(body, normalizedGasPath)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run(fmt.Sprintf("emptyResponse.%s", listForDevelopmentPath), func(t *testing.T) {
+		_, err := getBytes(body, listForDevelopmentPath)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run(fmt.Sprintf("emptyResponse.%s", uomPath), func(t *testing.T) {
+		_, err := getBytes(body, uomPath)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
 }
 
 func TestGet_SectionListForDevelopment(t *testing.T) {
@@ -321,6 +413,16 @@ func TestGet_SectionListForDevelopment(t *testing.T) {
 			t.Error("errEmptyBody error expected")
 		}
 	})
+
+	t.Run("Get.SectionListForDevelopment.WithEmptyResponse", func(t *testing.T) {
+		var emptyBody = []byte("{}")
+
+		_, err := Get(SectionListForDevelopment, emptyBody)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
 }
 
 func TestGet_SectionNormalizedWasteWaterData(t *testing.T) {
@@ -333,6 +435,16 @@ func TestGet_SectionNormalizedWasteWaterData(t *testing.T) {
 			t.Error("errEmptyBody error expected")
 		}
 	})
+
+	t.Run("Get.SectionNormalizedWasteWaterData.WithEmptyResponse", func(t *testing.T) {
+		var emptyBody = []byte("{}")
+
+		_, err := Get(SectionNormalizedWasteWaterData, emptyBody)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
 }
 
 func TestGet_SectionNormalizedColdWaterData(t *testing.T) {
@@ -343,6 +455,16 @@ func TestGet_SectionNormalizedColdWaterData(t *testing.T) {
 
 		if err != errEmptyBody {
 			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("Get.SectionNormalizedColdWaterData.WithEmptyResponse", func(t *testing.T) {
+		var emptyBody = []byte("{}")
+
+		_, err := Get(SectionNormalizedColdWaterData, emptyBody)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
 		}
 	})
 }
@@ -385,6 +507,16 @@ func TestGet_SectionNormalizedHotWaterData(t *testing.T) {
 			t.Error("errEmptyBody error expected")
 		}
 	})
+
+	t.Run("Get.SectionNormalizedHotWaterData.WithEmptyResponse", func(t *testing.T) {
+		var emptyBody = []byte("{}")
+
+		_, err := Get(SectionNormalizedColdWaterData, emptyBody)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
 }
 
 func TestGet_SectionNormalizedHeatData(t *testing.T) {
@@ -425,6 +557,16 @@ func TestGet_SectionNormalizedHeatData(t *testing.T) {
 			t.Error("errEmptyBody error expected")
 		}
 	})
+
+	t.Run("Get.SectionNormalizedHeatData.WithEmptyResponse", func(t *testing.T) {
+		var emptyBody = []byte("{}")
+
+		_, err := Get(SectionNormalizedHeatData, emptyBody)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
 }
 
 func TestGet_SectionNormalizedElectricityData(t *testing.T) {
@@ -435,6 +577,26 @@ func TestGet_SectionNormalizedElectricityData(t *testing.T) {
 
 		if err != errEmptyBody {
 			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("Get.SectionNormalizedElectricityData.WithEmptyResponse", func(t *testing.T) {
+		var emptyBody = []byte("{}")
+
+		_, err := Get(SectionNormalizedElectricityData, emptyBody)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
+
+	t.Run("Get.SectionNormalizedElectricityData.WithEmptyResponse", func(t *testing.T) {
+		var emptyBody = []byte("{}")
+
+		_, err := Get(SectionNormalizedElectricityData, emptyBody)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
 		}
 	})
 }
@@ -449,6 +611,16 @@ func TestGet_SectionNormalizedElectricityCurrentData(t *testing.T) {
 			t.Error("errEmptyBody error expected")
 		}
 	})
+
+	t.Run("Get.SectionNormalizedElectricityCurrentData.WithEmptyResponse", func(t *testing.T) {
+		var emptyBody = []byte("{}")
+
+		_, err := Get(SectionNormalizedElectricityCurrentData, emptyBody)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
 }
 
 func TestGet_SectionNormalizedGasData(t *testing.T) {
@@ -459,6 +631,16 @@ func TestGet_SectionNormalizedGasData(t *testing.T) {
 
 		if err != errEmptyBody {
 			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("Get.SectionNormalizedGasData.WithEmptyResponse", func(t *testing.T) {
+		var emptyBody = []byte("{}")
+
+		_, err := Get(SectionNormalizedGasData, emptyBody)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
 		}
 	})
 }
@@ -501,6 +683,16 @@ func TestGet_SectionUoM(t *testing.T) {
 			t.Error("errEmptyBody error expected")
 		}
 	})
+
+	t.Run("Get.SectionUoM.WithEmptyResponse", func(t *testing.T) {
+		var emptyBody = []byte("{}")
+
+		_, err := Get(SectionUoM, emptyBody)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
+		}
+	})
 }
 
 func TestGet_SectionRawData(t *testing.T) {
@@ -539,6 +731,16 @@ func TestGet_SectionRawData(t *testing.T) {
 
 		if err != errEmptyBody {
 			t.Error("errEmptyBody error expected")
+		}
+	})
+
+	t.Run("Get.SectionRawData.WithEmptyResponse", func(t *testing.T) {
+		var emptyBody = []byte("{}")
+
+		_, err := Get(SectionRawData, emptyBody)
+
+		if _, ok := err.(*PathError); !ok {
+			t.Fail()
 		}
 	})
 }
