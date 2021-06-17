@@ -1,11 +1,7 @@
 .PHONY: test testAll
 all: test
 
-test: testMain testArchive testDate testResponse
-
-testMain:
-	@echo "test go-eldis..."
-	go test -v -timeout 30s
+test: testArchive testDate testResponse
 
 testArchive:
 	@echo "test go-eldis/archive..."
@@ -21,4 +17,4 @@ testResponse:
 
 testAll: test
 	@echo "run integration tests..."
-	go test -v -timeout 30s . -tags=integration -args ${params}
+	go test -v . -tags=integration -args ${params}

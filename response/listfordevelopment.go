@@ -14,9 +14,13 @@ type RegPointStatus byte
 
 const (
 	// RegPointStatusActive активная точка учета
-	RegPointStatusActive RegPointStatus = iota
+	RegPointStatusActive RegPointStatus = iota + 1
 	// RegPointStatusInactive неактивная точка учета
 	RegPointStatusInactive
+	// RegPointStatusMeasurementSchemeChanged на точке учета изменена схема измерения
+	RegPointStatusMeasurementSchemeChanged
+	// RegPointStatusWithoutAutoReading	точка учета без автоопроса показаний
+	RegPointStatusWithoutAutoReading
 )
 
 // RegPoint описание точки учета в АИСКУТЭ ЭЛДИС

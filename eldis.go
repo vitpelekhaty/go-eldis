@@ -1,6 +1,7 @@
 package eldis
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -61,6 +62,11 @@ func NewConnection(client *http.Client) (*Connection, error) {
 
 // Open открывает соединение с API ЭЛДИС
 func (c *Connection) Open(rawURL string, withAuth WithAuthOption) error {
+	return c.OpenWithContext(context.Background(), rawURL, withAuth)
+}
+
+// OpenWithContext открывает соединение с API ЭЛДИС
+func (c *Connection) OpenWithContext(ctx context.Context, rawURL string, withAuth WithAuthOption) error {
 	if c.Connected() {
 		return errors.New("connection has already been established")
 	}
@@ -79,16 +85,21 @@ func (c *Connection) Open(rawURL string, withAuth WithAuthOption) error {
 
 	withAuth(c)
 
-	return c.login()
+	return c.login(ctx)
 }
 
 // Close закрывает соединение с API ЭЛДИС
 func (c *Connection) Close() error {
+	return c.CloseWithContext(context.Background())
+}
+
+// CloseWithContext закрывает соединение с API ЭЛДИС
+func (c *Connection) CloseWithContext(ctx context.Context) error {
 	if !c.Connected() {
 		return nil
 	}
 
-	err := c.logout()
+	err := c.logout(ctx)
 
 	if err != nil {
 		return err
@@ -107,6 +118,12 @@ func (c *Connection) Connected() bool {
 
 // ListForDevelopment вызывает метод /api/v2/tv/listForDevelopment API для получения списка доступных точек учета
 func (c *Connection) ListForDevelopment() ([]byte, error) {
+	return c.ListForDevelopmentWithContext(context.Background())
+}
+
+// ListForDevelopmentWithContext вызывает метод /api/v2/tv/listForDevelopment API для получения списка доступных точек
+// учета
+func (c *Connection) ListForDevelopmentWithContext(ctx context.Context) ([]byte, error) {
 	if !c.Connected() {
 		return nil, newMethodCallError(methodListForDevelopment, "GET", errors.New("no connection"))
 	}
@@ -123,7 +140,7 @@ func (c *Connection) ListForDevelopment() ([]byte, error) {
 		return nil, newMethodCallError(methodListForDevelopment, "GET", err)
 	}
 
-	body, err := c.call(u, "GET")
+	body, err := c.call(ctx, u, "GET")
 
 	if err != nil {
 		return nil, newMethodCallError(methodListForDevelopment, "GET", err)
@@ -144,6 +161,11 @@ func (c *Connection) ListForDevelopment() ([]byte, error) {
 
 // UOMList вызывает метод /api/v2/uom/list API для получения списка единиц измерения
 func (c *Connection) UOMList() ([]byte, error) {
+	return c.UOMListWithContext(context.Background())
+}
+
+// UOMListWithContext вызывает метод /api/v2/uom/list API для получения списка единиц измерения
+func (c *Connection) UOMListWithContext(ctx context.Context) ([]byte, error) {
 	if !c.Connected() {
 		return nil, newMethodCallError(methodUOMList, "GET", errors.New("no connection"))
 	}
@@ -160,7 +182,7 @@ func (c *Connection) UOMList() ([]byte, error) {
 		return nil, newMethodCallError(methodUOMList, "GET", err)
 	}
 
-	body, err := c.call(u, "GET")
+	body, err := c.call(ctx, u, "GET")
 
 	if err != nil {
 		return nil, newMethodCallError(methodUOMList, "GET", err)
@@ -183,6 +205,13 @@ func (c *Connection) UOMList() ([]byte, error) {
 // на точке учета
 func (c *Connection) DataNormalized(regPointID string, archive archive.DataArchive, from, to RequestTime,
 	dateType date.Type) ([]byte, error) {
+	return c.DataNormalizedWithContext(context.Background(), regPointID, archive, from, to, dateType)
+}
+
+// DataNormalizedWithContext вызывает метод /api/v2/data/normalized для получения нормализованных (после достоверизации)
+// показаний на точке учета
+func (c *Connection) DataNormalizedWithContext(ctx context.Context, regPointID string, archive archive.DataArchive,
+	from, to RequestTime, dateType date.Type) ([]byte, error) {
 	if !c.Connected() {
 		return nil, newMethodCallError(methodDataNormalized, "GET", errors.New("no connection"))
 	}
@@ -209,7 +238,7 @@ func (c *Connection) DataNormalized(regPointID string, archive archive.DataArchi
 
 	u.RawQuery = query.Encode()
 
-	body, err := c.call(u, "GET")
+	body, err := c.call(ctx, u, "GET")
 
 	if err != nil {
 		return nil, newMethodCallError(methodDataNormalized, "GET", err)
@@ -230,6 +259,12 @@ func (c *Connection) DataNormalized(regPointID string, archive archive.DataArchi
 
 // RawData вызывает метод /api/v2/data/rawData для получения "сырых" показаний на точке учета
 func (c *Connection) RawData(regPointID string, archive archive.DataArchive, from,
+	to RequestTime) ([]byte, error) {
+	return c.RawDataWithContext(context.Background(), regPointID, archive, from, to)
+}
+
+// RawDataWithContext вызывает метод /api/v2/data/rawData для получения "сырых" показаний на точке учета
+func (c *Connection) RawDataWithContext(ctx context.Context, regPointID string, archive archive.DataArchive, from,
 	to RequestTime) ([]byte, error) {
 	if !c.Connected() {
 		return nil, newMethodCallError(methodRawData, "GET", errors.New("no connection"))
@@ -256,7 +291,7 @@ func (c *Connection) RawData(regPointID string, archive archive.DataArchive, fro
 
 	u.RawQuery = query.Encode()
 
-	body, err := c.call(u, "GET")
+	body, err := c.call(ctx, u, "GET")
 
 	if err != nil {
 		return nil, newMethodCallError(methodRawData, "GET", err)
@@ -275,7 +310,7 @@ func (c *Connection) RawData(regPointID string, archive archive.DataArchive, fro
 	return body, nil
 }
 
-func (c *Connection) login() error {
+func (c *Connection) login(ctx context.Context) error {
 	methodRawURL, err := join(c.rawURL, methodLogin)
 
 	if err != nil {
@@ -287,7 +322,7 @@ func (c *Connection) login() error {
 	form.Add("login", c.auth.username)
 	form.Add("password", c.auth.password)
 
-	req, err := http.NewRequest("POST", methodRawURL, strings.NewReader(form.Encode()))
+	req, err := http.NewRequestWithContext(ctx, "POST", methodRawURL, strings.NewReader(form.Encode()))
 
 	if err != nil {
 		return newMethodCallError(methodLogin, "POST", err)
@@ -339,7 +374,7 @@ func (c *Connection) login() error {
 	return nil
 }
 
-func (c *Connection) logout() error {
+func (c *Connection) logout(ctx context.Context) error {
 	methodRawURL, err := join(c.rawURL, methodLogout)
 
 	if err != nil {
@@ -352,7 +387,7 @@ func (c *Connection) logout() error {
 		return newMethodCallError(methodLogout, "GET", err)
 	}
 
-	body, err := c.call(u, "GET")
+	body, err := c.call(ctx, u, "GET")
 
 	if err != nil {
 		return newMethodCallError(methodLogout, "GET", err)
@@ -371,8 +406,8 @@ func (c *Connection) logout() error {
 	return nil
 }
 
-func (c *Connection) call(u *url.URL, method string) ([]byte, error) {
-	req, err := http.NewRequest(method, u.String(), nil)
+func (c *Connection) call(ctx context.Context, u *url.URL, method string) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, method, u.String(), nil)
 
 	if err != nil {
 		return nil, err
