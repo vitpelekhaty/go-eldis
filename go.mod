@@ -3,8 +3,8 @@ module github.com/vitpelekhaty/go-eldis
 go 1.15
 
 require (
-	github.com/araddon/dateparse v0.0.0-20201001162425-8aadafed4dc4
+	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/guregu/null v4.0.0+incompatible
-	github.com/tidwall/gjson v1.6.7
+	github.com/tidwall/gjson v1.11.0
 	github.com/vitpelekhaty/httptracer v0.1.0
 )
