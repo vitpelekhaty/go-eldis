@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package eldis
@@ -22,19 +23,21 @@ import (
 )
 
 var (
-	username           string
-	password           string
-	apiKey             string
-	rawURL             string
-	insecureSkipVerify bool
-	bodies             bool
-	tracePath          string
-	strTimeout         string
-	limit              uint
-	strStart           string
-	strEnd             string
-	strDataArchive     string
-	strDateType        string
+	username                          string
+	password                          string
+	apiKey                            string
+	rawURL                            string
+	insecureSkipVerify                bool
+	bodies                            bool
+	tracePath                         string
+	strTimeout                        string
+	limit                             uint
+	strStart                          string
+	strEnd                            string
+	strDataArchive                    string
+	strDateType                       string
+	compressedResponse                bool
+	useCompressedResponseFlagInHeader bool
 )
 
 func init() {
@@ -51,6 +54,9 @@ func init() {
 	flag.StringVar(&strEnd, "to", "", "end of measurement period")
 	flag.StringVar(&strDataArchive, "archive", "HourArchive", "type of archive")
 	flag.StringVar(&strDateType, "date", "date", "type of date (for DataNormalized())")
+	flag.BoolVar(&compressedResponse, "compressed-response", false, "compress response")
+	flag.BoolVar(&useCompressedResponseFlagInHeader, "compressed-response-header", false,
+		"use compress-response flag in HTTP header")
 }
 
 const (
@@ -58,6 +64,16 @@ const (
 )
 
 func TestConnection_RawData(t *testing.T) {
+	flags := make([]Flag, 0)
+
+	if compressedResponse {
+		flags = append(flags, CompressedResponse)
+	}
+
+	if useCompressedResponseFlagInHeader {
+		flags = append(flags, UseCompressedResponseFlagInHeader)
+	}
+
 	_, err := url.Parse(rawURL)
 
 	if err != nil {
@@ -164,7 +180,7 @@ func TestConnection_RawData(t *testing.T) {
 		}
 	}()
 
-	uom, err := c.UOMList()
+	uom, err := c.UOMList(flags...)
 
 	if err != nil {
 		t.Errorf("UoMList() error: %q", err)
@@ -174,7 +190,7 @@ func TestConnection_RawData(t *testing.T) {
 		t.Error("UoMList() error: empty body")
 	}
 
-	p, err := c.ListForDevelopment()
+	p, err := c.ListForDevelopment(flags...)
 
 	if err != nil {
 		t.Fatalf("ListForDevelopment() error: %q", err)
@@ -212,7 +228,7 @@ func TestConnection_RawData(t *testing.T) {
 
 		t.Logf("RawData() for point %s (sensor %s %s)", regPoint.ID, regPoint.DeviceName, regPoint.SN)
 
-		d, err := c.RawData(point.RegPoint.ID, archiveType, RequestTime(start), RequestTime(end))
+		d, err := c.RawData(point.RegPoint.ID, archiveType, RequestTime(start), RequestTime(end), flags...)
 
 		if err != nil {
 			t.Errorf("RawData() error: %q", err)
@@ -235,6 +251,16 @@ func TestConnection_RawData(t *testing.T) {
 }
 
 func TestConnection_DataNormalized(t *testing.T) {
+	flags := make([]Flag, 0)
+
+	if compressedResponse {
+		flags = append(flags, CompressedResponse)
+	}
+
+	if useCompressedResponseFlagInHeader {
+		flags = append(flags, UseCompressedResponseFlagInHeader)
+	}
+
 	_, err := url.Parse(rawURL)
 
 	if err != nil {
@@ -347,7 +373,7 @@ func TestConnection_DataNormalized(t *testing.T) {
 		}
 	}()
 
-	uom, err := c.UOMList()
+	uom, err := c.UOMList(flags...)
 
 	if err != nil {
 		t.Errorf("UoMList() error: %q", err)
@@ -357,7 +383,7 @@ func TestConnection_DataNormalized(t *testing.T) {
 		t.Error("UoMList() error: empty body")
 	}
 
-	p, err := c.ListForDevelopment()
+	p, err := c.ListForDevelopment(flags...)
 
 	if err != nil {
 		t.Fatalf("ListForDevelopment() error: %q", err)
@@ -395,7 +421,8 @@ func TestConnection_DataNormalized(t *testing.T) {
 
 		t.Logf("DataNormalized() for point %s (sensor %s %s)", regPoint.ID, regPoint.DeviceName, regPoint.SN)
 
-		d, err := c.DataNormalized(point.RegPoint.ID, archiveType, RequestTime(start), RequestTime(end), dateType)
+		d, err := c.DataNormalized(point.RegPoint.ID, archiveType, RequestTime(start), RequestTime(end), dateType,
+			flags...)
 
 		if err != nil {
 			t.Errorf("DataNormalized() error: %q", err)
@@ -414,6 +441,238 @@ func TestConnection_DataNormalized(t *testing.T) {
 		}
 
 		pointCount++
+	}
+}
+
+func TestConnection_UOMList(t *testing.T) {
+	flags := make([]Flag, 0)
+
+	if compressedResponse {
+		flags = append(flags, CompressedResponse)
+	}
+
+	if useCompressedResponseFlagInHeader {
+		flags = append(flags, UseCompressedResponseFlagInHeader)
+	}
+
+	_, err := url.Parse(rawURL)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	timeout, err := time.ParseDuration(strTimeout)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	client := setupHTTPClient(timeout*time.Second, insecureSkipVerify)
+
+	if strings.TrimSpace(tracePath) != "" {
+		f, err := os.Create(tracePath)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		defer func() {
+			if _, err := f.WriteString("]"); err != nil {
+				t.Error(err)
+			}
+
+			if err := f.Close(); err != nil {
+				t.Error(err)
+			}
+		}()
+
+		_, err = f.WriteString("[")
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		emptyTrace := true
+
+		callbackFunc := func(entry *httptracer.Entry) {
+			if entry == nil {
+				return
+			}
+
+			b, err := json.Marshal(entry)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if !emptyTrace {
+				_, err = f.WriteString(",")
+
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			_, err = f.Write(b)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			emptyTrace = false
+		}
+
+		client = setupTracer(client, setupTracerOptions(bodies, callbackFunc)...)
+	}
+
+	c, err := NewConnection(client)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = c.Open(rawURL, WithAuth(username, password, apiKey))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer func() {
+		if err := c.Close(); err != nil {
+			t.Error(err)
+		}
+	}()
+
+	uom, err := c.UOMList(flags...)
+
+	if err != nil {
+		t.Errorf("UoMList() error: %q", err)
+	}
+
+	if len(uom) == 0 {
+		t.Error("UoMList() error: empty body")
+	}
+
+	_, err = response.ParseUoMGroups(uom)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestConnection_ListForDevelopment(t *testing.T) {
+	flags := make([]Flag, 0)
+
+	if compressedResponse {
+		flags = append(flags, CompressedResponse)
+	}
+
+	if useCompressedResponseFlagInHeader {
+		flags = append(flags, UseCompressedResponseFlagInHeader)
+	}
+
+	_, err := url.Parse(rawURL)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	timeout, err := time.ParseDuration(strTimeout)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	client := setupHTTPClient(timeout*time.Second, insecureSkipVerify)
+
+	if strings.TrimSpace(tracePath) != "" {
+		f, err := os.Create(tracePath)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		defer func() {
+			if _, err := f.WriteString("]"); err != nil {
+				t.Error(err)
+			}
+
+			if err := f.Close(); err != nil {
+				t.Error(err)
+			}
+		}()
+
+		_, err = f.WriteString("[")
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		emptyTrace := true
+
+		callbackFunc := func(entry *httptracer.Entry) {
+			if entry == nil {
+				return
+			}
+
+			b, err := json.Marshal(entry)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if !emptyTrace {
+				_, err = f.WriteString(",")
+
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			_, err = f.Write(b)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			emptyTrace = false
+		}
+
+		client = setupTracer(client, setupTracerOptions(bodies, callbackFunc)...)
+	}
+
+	c, err := NewConnection(client)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = c.Open(rawURL, WithAuth(username, password, apiKey))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer func() {
+		if err := c.Close(); err != nil {
+			t.Error(err)
+		}
+	}()
+
+	p, err := c.ListForDevelopment(flags...)
+
+	if err != nil {
+		t.Fatalf("ListForDevelopment() error: %q", err)
+	}
+
+	if len(p) == 0 {
+		t.Fatal("ListForDevelopment() error: empty body")
+	}
+
+	_, err = response.ParseRegPoints(p)
+
+	if err != nil {
+		t.Fatalf("ParseRegPointsWithContext() error: %q", err)
 	}
 }
 

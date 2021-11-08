@@ -117,13 +117,13 @@ func (c *Connection) Connected() bool {
 }
 
 // ListForDevelopment вызывает метод /api/v2/tv/listForDevelopment API для получения списка доступных точек учета
-func (c *Connection) ListForDevelopment() ([]byte, error) {
-	return c.ListForDevelopmentWithContext(context.Background())
+func (c *Connection) ListForDevelopment(flags ...Flag) ([]byte, error) {
+	return c.ListForDevelopmentWithContext(context.Background(), flags...)
 }
 
 // ListForDevelopmentWithContext вызывает метод /api/v2/tv/listForDevelopment API для получения списка доступных точек
 // учета
-func (c *Connection) ListForDevelopmentWithContext(ctx context.Context) ([]byte, error) {
+func (c *Connection) ListForDevelopmentWithContext(ctx context.Context, flags ...Flag) ([]byte, error) {
 	if !c.Connected() {
 		return nil, newMethodCallError(methodListForDevelopment, "GET", errors.New("no connection"))
 	}
@@ -140,7 +140,7 @@ func (c *Connection) ListForDevelopmentWithContext(ctx context.Context) ([]byte,
 		return nil, newMethodCallError(methodListForDevelopment, "GET", err)
 	}
 
-	body, err := c.call(ctx, u, "GET")
+	body, err := c.call(ctx, u, "GET", flags...)
 
 	if err != nil {
 		return nil, newMethodCallError(methodListForDevelopment, "GET", err)
@@ -160,12 +160,12 @@ func (c *Connection) ListForDevelopmentWithContext(ctx context.Context) ([]byte,
 }
 
 // UOMList вызывает метод /api/v2/uom/list API для получения списка единиц измерения
-func (c *Connection) UOMList() ([]byte, error) {
-	return c.UOMListWithContext(context.Background())
+func (c *Connection) UOMList(flags ...Flag) ([]byte, error) {
+	return c.UOMListWithContext(context.Background(), flags...)
 }
 
 // UOMListWithContext вызывает метод /api/v2/uom/list API для получения списка единиц измерения
-func (c *Connection) UOMListWithContext(ctx context.Context) ([]byte, error) {
+func (c *Connection) UOMListWithContext(ctx context.Context, flags ...Flag) ([]byte, error) {
 	if !c.Connected() {
 		return nil, newMethodCallError(methodUOMList, "GET", errors.New("no connection"))
 	}
@@ -182,7 +182,7 @@ func (c *Connection) UOMListWithContext(ctx context.Context) ([]byte, error) {
 		return nil, newMethodCallError(methodUOMList, "GET", err)
 	}
 
-	body, err := c.call(ctx, u, "GET")
+	body, err := c.call(ctx, u, "GET", flags...)
 
 	if err != nil {
 		return nil, newMethodCallError(methodUOMList, "GET", err)
@@ -204,14 +204,14 @@ func (c *Connection) UOMListWithContext(ctx context.Context) ([]byte, error) {
 // DataNormalized вызывает метод /api/v2/data/normalized для получения нормализованных (после достоверизации) показаний
 // на точке учета
 func (c *Connection) DataNormalized(regPointID string, archive archive.DataArchive, from, to RequestTime,
-	dateType date.Type) ([]byte, error) {
-	return c.DataNormalizedWithContext(context.Background(), regPointID, archive, from, to, dateType)
+	dateType date.Type, flags ...Flag) ([]byte, error) {
+	return c.DataNormalizedWithContext(context.Background(), regPointID, archive, from, to, dateType, flags...)
 }
 
 // DataNormalizedWithContext вызывает метод /api/v2/data/normalized для получения нормализованных (после достоверизации)
 // показаний на точке учета
 func (c *Connection) DataNormalizedWithContext(ctx context.Context, regPointID string, archive archive.DataArchive,
-	from, to RequestTime, dateType date.Type) ([]byte, error) {
+	from, to RequestTime, dateType date.Type, flags ...Flag) ([]byte, error) {
 	if !c.Connected() {
 		return nil, newMethodCallError(methodDataNormalized, "GET", errors.New("no connection"))
 	}
@@ -238,7 +238,7 @@ func (c *Connection) DataNormalizedWithContext(ctx context.Context, regPointID s
 
 	u.RawQuery = query.Encode()
 
-	body, err := c.call(ctx, u, "GET")
+	body, err := c.call(ctx, u, "GET", flags...)
 
 	if err != nil {
 		return nil, newMethodCallError(methodDataNormalized, "GET", err)
@@ -259,13 +259,13 @@ func (c *Connection) DataNormalizedWithContext(ctx context.Context, regPointID s
 
 // RawData вызывает метод /api/v2/data/rawData для получения "сырых" показаний на точке учета
 func (c *Connection) RawData(regPointID string, archive archive.DataArchive, from,
-	to RequestTime) ([]byte, error) {
-	return c.RawDataWithContext(context.Background(), regPointID, archive, from, to)
+	to RequestTime, flags ...Flag) ([]byte, error) {
+	return c.RawDataWithContext(context.Background(), regPointID, archive, from, to, flags...)
 }
 
 // RawDataWithContext вызывает метод /api/v2/data/rawData для получения "сырых" показаний на точке учета
 func (c *Connection) RawDataWithContext(ctx context.Context, regPointID string, archive archive.DataArchive, from,
-	to RequestTime) ([]byte, error) {
+	to RequestTime, flags ...Flag) ([]byte, error) {
 	if !c.Connected() {
 		return nil, newMethodCallError(methodRawData, "GET", errors.New("no connection"))
 	}
@@ -291,7 +291,7 @@ func (c *Connection) RawDataWithContext(ctx context.Context, regPointID string, 
 
 	u.RawQuery = query.Encode()
 
-	body, err := c.call(ctx, u, "GET")
+	body, err := c.call(ctx, u, "GET", flags...)
 
 	if err != nil {
 		return nil, newMethodCallError(methodRawData, "GET", err)
@@ -406,7 +406,7 @@ func (c *Connection) logout(ctx context.Context) error {
 	return nil
 }
 
-func (c *Connection) call(ctx context.Context, u *url.URL, method string) ([]byte, error) {
+func (c *Connection) call(ctx context.Context, u *url.URL, method string, flags ...Flag) ([]byte, error) {
 	req, err := http.NewRequestWithContext(ctx, method, u.String(), nil)
 
 	if err != nil {
@@ -415,6 +415,17 @@ func (c *Connection) call(ctx context.Context, u *url.URL, method string) ([]byt
 
 	req.Header.Set("Cookie", fmt.Sprintf("access_token=%s", c.token))
 	req.Header.Set("key", c.auth.key)
+
+	if flagExists(CompressedResponse, flags...) {
+		if flagExists(UseCompressedResponseFlagInHeader, flags...) {
+			req.Header.Set("compressed-response", "true")
+		} else {
+			q := u.Query()
+			q.Set("compressed_response", "true")
+
+			u.RawQuery = q.Encode()
+		}
+	}
 
 	resp, err := c.client.Do(req)
 

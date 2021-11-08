@@ -15,6 +15,10 @@ testResponse:
 	@echo "test go-eldis/response..."
 	go test -v -timeout 30s github.com/vitpelekhaty/go-eldis/response
 
-testAll: test
-	@echo "run integration tests..."
-	go test -v . -tags=integration -args ${params}
+iTestUOMList:
+	@echo "run connection.UOMList() integration test..."
+	go test -v . -tags=integration -run TestConnection_UOMList -args ${params}
+
+iTestListForDevelopment:
+	@echo "run connection.ListForDevelopment() integration test..."
+	go test -v . -tags=integration -run TestConnection_ListForDevelopment -args ${params}
