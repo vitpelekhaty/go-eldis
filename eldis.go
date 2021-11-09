@@ -407,6 +407,16 @@ func (c *Connection) logout(ctx context.Context) error {
 }
 
 func (c *Connection) call(ctx context.Context, u *url.URL, method string, flags ...Flag) ([]byte, error) {
+	compressedResponse := flagExists(CompressedResponse, flags...)
+	useCompressedResponseFlagInHeader := flagExists(UseCompressedResponseFlagInHeader, flags...)
+
+	if compressedResponse && !useCompressedResponseFlagInHeader {
+		q := u.Query()
+		q.Set("compressed_response", "true")
+
+		u.RawQuery = q.Encode()
+	}
+
 	req, err := http.NewRequestWithContext(ctx, method, u.String(), nil)
 
 	if err != nil {
@@ -416,15 +426,8 @@ func (c *Connection) call(ctx context.Context, u *url.URL, method string, flags 
 	req.Header.Set("Cookie", fmt.Sprintf("access_token=%s", c.token))
 	req.Header.Set("key", c.auth.key)
 
-	if flagExists(CompressedResponse, flags...) {
-		if flagExists(UseCompressedResponseFlagInHeader, flags...) {
-			req.Header.Set("compressed-response", "true")
-		} else {
-			q := u.Query()
-			q.Set("compressed_response", "true")
-
-			u.RawQuery = q.Encode()
-		}
+	if compressedResponse && useCompressedResponseFlagInHeader {
+		req.Header.Set("compressed-response", "true")
 	}
 
 	resp, err := c.client.Do(req)

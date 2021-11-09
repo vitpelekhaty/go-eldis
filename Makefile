@@ -22,3 +22,11 @@ iTestUOMList:
 iTestListForDevelopment:
 	@echo "run connection.ListForDevelopment() integration test..."
 	go test -v . -tags=integration -run TestConnection_ListForDevelopment -args ${params}
+
+iTestRawData:
+	@echo "run connection.RawData() integration test..."
+	go test -v . -tags=integration -run TestConnection_RawData -args ${params}
+
+iTestDataNormalized:
+	@echo "run connection.DataNormalized() integration test..."
+	go test -v . -tags=integration -run TestConnection_DataNormalized -args ${params}

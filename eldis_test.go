@@ -180,16 +180,6 @@ func TestConnection_RawData(t *testing.T) {
 		}
 	}()
 
-	uom, err := c.UOMList(flags...)
-
-	if err != nil {
-		t.Errorf("UoMList() error: %q", err)
-	}
-
-	if len(uom) == 0 {
-		t.Error("UoMList() error: empty body")
-	}
-
 	p, err := c.ListForDevelopment(flags...)
 
 	if err != nil {
@@ -372,16 +362,6 @@ func TestConnection_DataNormalized(t *testing.T) {
 			t.Error(err)
 		}
 	}()
-
-	uom, err := c.UOMList(flags...)
-
-	if err != nil {
-		t.Errorf("UoMList() error: %q", err)
-	}
-
-	if len(uom) == 0 {
-		t.Error("UoMList() error: empty body")
-	}
 
 	p, err := c.ListForDevelopment(flags...)
 
