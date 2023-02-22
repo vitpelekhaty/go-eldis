@@ -7,7 +7,7 @@
 
 # Test binary, built with `go test -c`
 *.test
-/testdata
+**/testdata
 
 # Scripts
 *.sh
@@ -19,4 +19,4 @@
 # vendor/
 
 # IDE settings
-/.idea
+**/.idea
