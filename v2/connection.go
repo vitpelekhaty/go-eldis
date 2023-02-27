@@ -1,6 +1,7 @@
 package eldis
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -10,6 +11,10 @@ import (
 	"path"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/go-multierror"
+
+	"github.com/vitpelekhaty/go-eldis/v2/responses"
 )
 
 var (
@@ -30,6 +35,15 @@ type MethodCallError struct {
 }
 
 func (err *MethodCallError) Error() string {
+	return fmt.Sprintf("%s %s: %s", err.Method, err.RawURL, err.Err)
+}
+
+// InternalServerError внутренняя ошибка сервера API АИИС ЭЛДИС
+type InternalServerError struct {
+	*MethodCallError
+}
+
+func (err *InternalServerError) Error() string {
 	return fmt.Sprintf("%s %s: %s", err.Method, err.RawURL, err.Err)
 }
 
@@ -126,16 +140,30 @@ func (conn *connection) reconnect(ctx context.Context, username, password, acces
 		"key":          accessToken,
 	}
 
-	_, err = conn.call(ctx, http.MethodPost, rawURL, headers, strings.NewReader(form.Encode()))
+	response, err := conn.call(ctx, http.MethodPost, rawURL, headers, strings.NewReader(form.Encode()))
 
 	if err != nil {
 		return
 	}
 
-	return "", nil
+	_, err = body(response)
+
+	if err != nil {
+		return
+	}
+
+	c, ok := cookie(response, "access_token")
+
+	if !ok || c.Value == "" {
+		return "", &MethodCallError{Method: http.MethodPost, RawURL: rawURL, Err: ErrNotConnected}
+	}
+
+	token = c.Value
+
+	return
 }
 
-func (conn *connection) call(ctx context.Context, method, rawURL string, headers map[string]string, body io.Reader) ([]byte, error) {
+func (conn *connection) call(ctx context.Context, method, rawURL string, headers map[string]string, body io.Reader) (*http.Response, error) {
 	request, err := http.NewRequestWithContext(ctx, method, rawURL, body)
 
 	if err != nil {
@@ -143,7 +171,6 @@ func (conn *connection) call(ctx context.Context, method, rawURL string, headers
 	}
 
 	for header, value := range headers {
-
 		request.Header.Set(header, value)
 	}
 
@@ -153,19 +180,55 @@ func (conn *connection) call(ctx context.Context, method, rawURL string, headers
 		return nil, &MethodCallError{Method: method, RawURL: rawURL, Err: err}
 	}
 
+	return response, nil
+}
+
+func body(response *http.Response) ([]byte, error) {
 	defer func() {
 		_ = response.Body.Close()
 	}()
 
-	if response.StatusCode != http.StatusOK {
-		return nil, &MethodCallError{
-			Method: method,
-			RawURL: rawURL,
-			Err:    fmt.Errorf("%d %s", response.StatusCode, http.StatusText(response.StatusCode)),
+	b, err := io.ReadAll(response.Body)
+
+	if err != nil {
+		return nil, &MethodCallError{Method: response.Request.Method, RawURL: response.Request.URL.String(), Err: err}
+	}
+
+	resp, err := responses.Parse(bytes.NewBuffer(b))
+
+	if err != nil {
+		return nil, &MethodCallError{Method: response.Request.Method, RawURL: response.Request.URL.String(), Err: err}
+	}
+
+	var ve error
+
+	for _, message := range resp.Messages() {
+		if message.Level == responses.MessageLevelError && message.StatusCode != http.StatusOK {
+			ve = multierror.Append(ve, fmt.Errorf("%d %s", message.Code, message.Message))
 		}
 	}
 
-	return io.ReadAll(response.Body)
+	if ve != nil {
+		return nil, &InternalServerError{
+			&MethodCallError{
+				Method: response.Request.Method,
+				RawURL: response.Request.URL.String(),
+				Err:    ve,
+			},
+		}
+	}
+
+	return b, nil
+}
+
+func cookie(response *http.Response, name string) (*http.Cookie, bool) {
+	for _, cookie := range response.Cookies() {
+		if strings.EqualFold(cookie.Name, name) {
+			return cookie, true
+		}
+	}
+
+	return nil, false
 }
 
 func join(addr string, query map[string]string, paths ...string) (string, error) {
