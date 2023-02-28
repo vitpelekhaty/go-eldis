@@ -80,11 +80,33 @@ func (conn *connection) Open(ctx context.Context, rawURL string, user UserOption
 	return nil
 }
 
+const pathLogout = "/api/v2/users/logout"
+
 // Close закрывает соединение с API АИИС ЭЛДИС
 func (conn *connection) Close(ctx context.Context) error {
 	if !conn.connected() {
 		return nil
 	}
+
+	rawURL, err := join(conn.rawURL, nil, pathLogout)
+
+	if err != nil {
+		return err
+	}
+
+	response, err := conn.call(ctx, http.MethodGet, rawURL, nil, nil)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = body(response)
+
+	if err != nil {
+		return err
+	}
+
+	conn.token = ""
 
 	return nil
 }
