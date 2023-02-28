@@ -35,6 +35,19 @@ const (
 	CurrentArchived Archive = "CurrentArchived"
 )
 
+var codeArchive = map[Archive]string{
+	CurrentValues:      "30001",
+	MinuteArchive:      "30002",
+	HourArchive:        "30003",
+	DailyArchive:       "30004",
+	MonthLongArchive:   "30005",
+	TotalCurrentValues: "30006",
+	IntervalArchive:    "30008",
+	HalfHourArchive:    "30017",
+	DecadeArchive:      "30022",
+	CurrentArchived:    "30023",
+}
+
 // DateType тип даты для поиска данных
 type DateType string
 

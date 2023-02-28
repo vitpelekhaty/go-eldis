@@ -111,14 +111,37 @@ func (conn *connection) Close(ctx context.Context) error {
 	return nil
 }
 
+const pathListForDevelopment = "/api/v2/tv/listForDevelopment"
+
 // ListForDevelopment возвращает список доступных пользователю точек учета
 func (conn *connection) ListForDevelopment(ctx context.Context) ([]byte, error) {
 	if !conn.connected() {
 		return nil, ErrNotConnected
 	}
 
-	return nil, nil
+	rawURL, err := join(conn.rawURL, nil, pathListForDevelopment)
+
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := conn.call(ctx, http.MethodGet, rawURL, nil, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := body(response)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
 }
+
+const pathDataNormalized = "/api/v2/data/normalized"
+const layoutRequestTime = "02.01.2006 15:04:05"
 
 // NormalizedReadings возвращает нормализованные показания точки учета, удовлетворяющие условиям
 func (conn *connection) NormalizedReadings(ctx context.Context, pointID string, archive Archive, from, to time.Time,
@@ -127,8 +150,36 @@ func (conn *connection) NormalizedReadings(ctx context.Context, pointID string, 
 		return nil, ErrNotConnected
 	}
 
-	return nil, nil
+	query := map[string]string{
+		"id":           pointID,
+		"typeDataCode": codeArchive[archive],
+		"startDate":    from.Format(layoutRequestTime),
+		"endDate":      to.Format(layoutRequestTime),
+		"dateType":     string(dateType),
+	}
+
+	rawURL, err := join(conn.rawURL, query, pathDataNormalized)
+
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := conn.call(ctx, http.MethodGet, rawURL, nil, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := body(response)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
 }
+
+const pathDataRaw = "/api/v2/data/rawData"
 
 // RawReadings возвращает "сырые" показания точки учета, удовлетворяющие условиям
 func (conn *connection) RawReadings(ctx context.Context, pointID string, archive Archive, from, to time.Time) ([]byte, error) {
@@ -136,7 +187,32 @@ func (conn *connection) RawReadings(ctx context.Context, pointID string, archive
 		return nil, ErrNotConnected
 	}
 
-	return nil, nil
+	query := map[string]string{
+		"id":           pointID,
+		"typeDataCode": codeArchive[archive],
+		"startDate":    from.Format(layoutRequestTime),
+		"endDate":      to.Format(layoutRequestTime),
+	}
+
+	rawURL, err := join(conn.rawURL, query, pathDataRaw)
+
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := conn.call(ctx, http.MethodGet, rawURL, nil, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := body(response)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
 }
 
 func (conn *connection) connected() bool {
