@@ -6,10 +6,22 @@ import (
 	"time"
 )
 
+// Credentials параметры доступа к API АИИС ЭЛДИС
+type Credentials struct {
+	// Username имя пользователя
+	Username string
+
+	// Password пароль пользователя
+	Password string
+
+	// AccessToken токен доступа
+	AccessToken string
+}
+
 // Connection интерфейс соединения с API АИИС ЭЛДИС
 type Connection interface {
 	// Open открывает соединение с API АИИС ЭЛДИС
-	Open(ctx context.Context, url string, user UserOptions) error
+	Open(ctx context.Context, url string, credentials Credentials) error
 
 	// Close закрывает соединение с API АИИС ЭЛДИС
 	Close(ctx context.Context) error
@@ -26,32 +38,20 @@ type Connection interface {
 }
 
 // Connect возвращает соединение с API АИИС ЭЛДИС
-func Connect(ctx context.Context, url string, user UserOptions, options ...ConnectionOption) (Connection, error) {
+func Connect(ctx context.Context, url string, credentials Credentials, options ...ConnectionOption) (Connection, error) {
 	conn := &connection{client: http.DefaultClient}
 
 	for _, option := range options {
 		option(conn)
 	}
 
-	err := conn.Open(ctx, url, user)
+	err := conn.Open(ctx, url, credentials)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return conn, nil
-}
-
-// UserOptions параметры соединения с АИИС ЭЛДИС
-type UserOptions struct {
-	// Username имя пользователя
-	Username string
-
-	// Password пароль пользователя
-	Password string
-
-	// AccessToken токен доступа к АИИС ЭЛДИС
-	AccessToken string
 }
 
 // ConnectionOption опция соединения с API АИИС ЭЛДИС

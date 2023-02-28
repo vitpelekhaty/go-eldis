@@ -3,7 +3,6 @@ package eldis
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,47 +16,18 @@ import (
 	"github.com/vitpelekhaty/go-eldis/v2/responses"
 )
 
-var (
-	ErrNotConnected = errors.New("не установлено соединение")
-	ErrConnected    = errors.New("соединение уже установлено")
-)
-
-// MethodCallError ошибка вызова метода API АИИС ЭЛДИС
-type MethodCallError struct {
-	// RawURL URL метода API
-	RawURL string
-
-	// Method метод
-	Method string
-
-	// Err ошибка, которая возникла во время вызова метода
-	Err error
-}
-
-func (err *MethodCallError) Error() string {
-	return fmt.Sprintf("%s %s: %s", err.Method, err.RawURL, err.Err)
-}
-
-// InternalServerError внутренняя ошибка сервера API АИИС ЭЛДИС
-type InternalServerError struct {
-	*MethodCallError
-}
-
-func (err *InternalServerError) Error() string {
-	return fmt.Sprintf("%s %s: %s", err.Method, err.RawURL, err.Err)
-}
-
 var _ Connection = (*connection)(nil)
 
 type connection struct {
 	client *http.Client
 	token  string
 	rawURL string
-	user   *UserOptions
+
+	credentials *Credentials
 }
 
 // Open открывает соединение с API АИИС ЭЛДИС
-func (conn *connection) Open(ctx context.Context, rawURL string, user UserOptions) error {
+func (conn *connection) Open(ctx context.Context, rawURL string, credentials Credentials) error {
 	if conn.connected() {
 		return ErrConnected
 	}
@@ -68,14 +38,14 @@ func (conn *connection) Open(ctx context.Context, rawURL string, user UserOption
 
 	conn.rawURL = rawURL
 
-	token, err := conn.reconnect(ctx, user.Username, user.Password, user.AccessToken)
+	token, err := conn.reconnect(ctx, conn.credentials)
 
 	if err != nil {
 		return err
 	}
 
 	conn.token = token
-	conn.user = &user
+	conn.credentials = &credentials
 
 	return nil
 }
@@ -125,10 +95,34 @@ func (conn *connection) ListForDevelopment(ctx context.Context) ([]byte, error) 
 		return nil, err
 	}
 
-	response, err := conn.call(ctx, http.MethodGet, rawURL, nil, nil)
+	headers := map[string]string{
+		"Cookie": fmt.Sprintf("access_token=%s", conn.token),
+		"key":    conn.credentials.AccessToken,
+	}
+
+	response, err := conn.call(ctx, http.MethodGet, rawURL, headers, nil)
 
 	if err != nil {
-		return nil, err
+		if rse, ok := err.(*RemoteServerError); ok {
+			if rse.StatusCode == http.StatusUnauthorized {
+				token, err := conn.reconnect(ctx, conn.credentials)
+
+				if err != nil {
+					return nil, err
+				}
+
+				conn.token = token
+				headers["Cookie"] = fmt.Sprintf("access_token=%s", conn.token)
+
+				response, err = conn.call(ctx, http.MethodGet, rawURL, headers, nil)
+
+				if err != nil {
+					return nil, err
+				}
+			}
+		} else {
+			return nil, err
+		}
 	}
 
 	b, err := body(response)
@@ -164,10 +158,34 @@ func (conn *connection) NormalizedReadings(ctx context.Context, pointID string, 
 		return nil, err
 	}
 
-	response, err := conn.call(ctx, http.MethodGet, rawURL, nil, nil)
+	headers := map[string]string{
+		"Cookie": fmt.Sprintf("access_token=%s", conn.token),
+		"key":    conn.credentials.AccessToken,
+	}
+
+	response, err := conn.call(ctx, http.MethodGet, rawURL, headers, nil)
 
 	if err != nil {
-		return nil, err
+		if rse, ok := err.(*RemoteServerError); ok {
+			if rse.StatusCode == http.StatusUnauthorized {
+				token, err := conn.reconnect(ctx, conn.credentials)
+
+				if err != nil {
+					return nil, err
+				}
+
+				conn.token = token
+				headers["Cookie"] = fmt.Sprintf("access_token=%s", conn.token)
+
+				response, err = conn.call(ctx, http.MethodGet, rawURL, headers, nil)
+
+				if err != nil {
+					return nil, err
+				}
+			}
+		} else {
+			return nil, err
+		}
 	}
 
 	b, err := body(response)
@@ -200,10 +218,34 @@ func (conn *connection) RawReadings(ctx context.Context, pointID string, archive
 		return nil, err
 	}
 
-	response, err := conn.call(ctx, http.MethodGet, rawURL, nil, nil)
+	headers := map[string]string{
+		"Cookie": fmt.Sprintf("access_token=%s", conn.token),
+		"key":    conn.credentials.AccessToken,
+	}
+
+	response, err := conn.call(ctx, http.MethodGet, rawURL, headers, nil)
 
 	if err != nil {
-		return nil, err
+		if rse, ok := err.(*RemoteServerError); ok {
+			if rse.StatusCode == http.StatusUnauthorized {
+				token, err := conn.reconnect(ctx, conn.credentials)
+
+				if err != nil {
+					return nil, err
+				}
+
+				conn.token = token
+				headers["Cookie"] = fmt.Sprintf("access_token=%s", conn.token)
+
+				response, err = conn.call(ctx, http.MethodGet, rawURL, headers, nil)
+
+				if err != nil {
+					return nil, err
+				}
+			}
+		} else {
+			return nil, err
+		}
 	}
 
 	b, err := body(response)
@@ -221,7 +263,7 @@ func (conn *connection) connected() bool {
 
 const pathLogin = "/api/v2/users/login"
 
-func (conn *connection) reconnect(ctx context.Context, username, password, accessToken string) (token string, err error) {
+func (conn *connection) reconnect(ctx context.Context, credentials *Credentials) (token string, err error) {
 	rawURL, err := join(conn.rawURL, nil, pathLogin)
 
 	if err != nil {
@@ -230,12 +272,12 @@ func (conn *connection) reconnect(ctx context.Context, username, password, acces
 
 	form := url.Values{}
 
-	form.Set("login", username)
-	form.Set("password", password)
+	form.Set("login", credentials.Username)
+	form.Set("password", credentials.Password)
 
 	headers := map[string]string{
 		"Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
-		"key":          accessToken,
+		"key":          credentials.AccessToken,
 	}
 
 	response, err := conn.call(ctx, http.MethodPost, rawURL, headers, strings.NewReader(form.Encode()))
@@ -276,6 +318,10 @@ func (conn *connection) call(ctx context.Context, method, rawURL string, headers
 
 	if err != nil {
 		return nil, &MethodCallError{Method: method, RawURL: rawURL, Err: err}
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return nil, &RemoteServerError{StatusCode: response.StatusCode}
 	}
 
 	return response, nil
