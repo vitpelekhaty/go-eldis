@@ -37,6 +37,7 @@ func (conn *connection) Open(ctx context.Context, rawURL string, credentials Cre
 	}
 
 	conn.rawURL = rawURL
+	conn.credentials = &credentials
 
 	token, err := conn.reconnect(ctx, conn.credentials)
 
@@ -45,7 +46,6 @@ func (conn *connection) Open(ctx context.Context, rawURL string, credentials Cre
 	}
 
 	conn.token = token
-	conn.credentials = &credentials
 
 	return nil
 }
@@ -64,7 +64,12 @@ func (conn *connection) Close(ctx context.Context) error {
 		return err
 	}
 
-	response, err := conn.call(ctx, http.MethodGet, rawURL, nil, nil)
+	headers := map[string]string{
+		"Cookie": fmt.Sprintf("access_token=%s", conn.token),
+		"key":    conn.credentials.AccessToken,
+	}
+
+	response, err := conn.call(ctx, http.MethodGet, rawURL, headers, nil)
 
 	if err != nil {
 		return err
