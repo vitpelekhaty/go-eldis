@@ -1,0 +1,126 @@
+{
+    "response": {
+      "tv": {
+        "listForDevelopment": [
+          {
+            "id": "cdd35916-0ed0-4aed-a226-888dd267111d",
+            "deviceID": "e9edcf63-77fc-484d-a104-55d92020385e",
+            "objectID": "23b3b662-46ed-466c-83bc-9503e9d8ed61",
+            "status": 1,
+            "identifier": null,
+            "identifier2": null,
+            "address": "Академика Павлова ул, д.   6 (МКД)",
+            "deviceName": "ТСРВ-026М",
+            "sn": "1203551",
+            "resourceName": "Тепло+ГВС",
+            "measurePointNumber": "1",
+            "measurePointName": "ТС1",
+            "isHeat": null,
+            "isGVS": null,
+            "inputConfiguration": 3,
+            "createdOn": 1562359661
+          },
+          {
+            "id": "63ad7773-6899-4841-8866-3087aad01e76",
+            "deviceID": "980856a5-90e2-42af-8fbe-440d6335c27b",
+            "objectID": "55a08f77-7bc2-449d-85e1-2df3d65fda07",
+            "status": 1,
+            "identifier": null,
+            "identifier2": null,
+            "address": "Академика Павлова ул, д.  10 (МКД)",
+            "deviceName": "ТСРВ-026М",
+            "sn": "1203232",
+            "resourceName": "Тепло+ГВС",
+            "measurePointNumber": "1",
+            "measurePointName": "ТС1",
+            "isHeat": null,
+            "isGVS": null,
+            "inputConfiguration": 3,
+            "createdOn": 1562677869
+          },
+          {
+            "id": "7ad25e8d-a10d-4821-9118-c654ee41c83e",
+            "deviceID": "a23a07d2-a6e8-4659-9ca5-f16179e4e15f",
+            "objectID": "e74d5049-1dc1-461b-bf58-a657adb7953d",
+            "status": 1,
+            "identifier": null,
+            "identifier2": null,
+            "address": "Академика Павлова ул, д.  16 (МКД)",
+            "deviceName": "ТСРВ-026М",
+            "sn": "1203640",
+            "resourceName": "Тепло+ГВС",
+            "measurePointNumber": "1",
+            "measurePointName": "ТС1",
+            "isHeat": null,
+            "isGVS": null,
+            "inputConfiguration": 3,
+            "createdOn": 1562677938
+          },
+          {
+            "id": "9df03c92-240c-4db4-8c4d-298368f736d8",
+            "deviceID": "750903b3-39a6-4c56-aa9f-f0867193171f",
+            "objectID": "08164d35-594b-488f-a046-70f48a94773d",
+            "status": 1,
+            "identifier": null,
+            "identifier2": null,
+            "address": "Академика Павлова ул, д.  18 (МКД)",
+            "deviceName": "ТСРВ-026М",
+            "sn": "1203300",
+            "resourceName": "Тепло+ГВС",
+            "measurePointNumber": "1",
+            "measurePointName": "ТС1",
+            "isHeat": null,
+            "isGVS": null,
+            "inputConfiguration": 3,
+            "createdOn": 1562678143
+          },
+          {
+            "id": "992c66bb-2c0a-4f45-afe9-51e2e915948c",
+            "deviceID": "ecb562a9-f510-4858-afd9-2676e546605f",
+            "objectID": "36b8ac18-1de7-47b1-b7dc-1679c0a7a1a2",
+            "status": 1,
+            "identifier": null,
+            "identifier2": null,
+            "address": "Свободная ул, д.   5б (МКД)",
+            "deviceName": "ТСРВ-026М",
+            "sn": "1216666",
+            "resourceName": "Тепло+ГВС",
+            "measurePointNumber": "1",
+            "measurePointName": "ТС1",
+            "isHeat": null,
+            "isGVS": null,
+            "inputConfiguration": 3,
+            "createdOn": 1566480403
+          },
+          {
+            "id": "60bbe94c-3564-444c-a33a-84e63b6e98c9",
+            "deviceID": "8368cce0-c092-4485-8b3c-04f2f8768fd8",
+            "objectID": "36b8ac18-1de7-47b1-b7dc-1679c0a7a1a2",
+            "status": 1,
+            "identifier": null,
+            "identifier2": null,
+            "address": "Свободная ул, д.   5б (МКД)",
+            "deviceName": "ТСРВ-026М",
+            "sn": "1701588",
+            "resourceName": "Тепло+ГВС",
+            "measurePointNumber": "1",
+            "measurePointName": "ТС1",
+            "isHeat": null,
+            "isGVS": null,
+            "inputConfiguration": 3,
+            "createdOn": 1566480454
+          }
+        ]
+      },
+      "messages": [
+        {
+          "httpStatusCode": 200,
+          "messageCode": 4200005,
+          "messageLevel": 2,
+          "id": "",
+          "name": "",
+          "message": "Успешно"
+        }
+      ]
+    }
+}
