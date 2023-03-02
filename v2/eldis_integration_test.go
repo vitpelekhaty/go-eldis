@@ -1,12 +1,16 @@
 package eldis
 
 import (
+	"bytes"
 	"context"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/vitpelekhaty/go-eldis/v2/responses"
+	"github.com/vitpelekhaty/go-eldis/v2/responses/points"
 )
 
 var (
@@ -46,8 +50,23 @@ func TestConnection_ListForDevelopment(t *testing.T) {
 		require.NoError(t, err)
 	}()
 
-	_, err = conn.ListForDevelopment(ctx)
+	b, err := conn.ListForDevelopment(ctx)
 	require.NoError(t, err)
+
+	sb := responses.Extract(responses.SectionListForDevelopment, bytes.NewBuffer(b))
+	require.NotEqual(t, 0, len(sb))
+
+	items, err := points.Parse(context.Background(), bytes.NewReader(sb))
+	require.NoError(t, err)
+
+	var count int
+
+	for item := range items {
+		require.NoError(t, item.E, "item", item)
+		count++
+	}
+
+	require.NotEqual(t, 0, count)
 }
 
 func TestConnection_NormalizedReadings(t *testing.T) {
