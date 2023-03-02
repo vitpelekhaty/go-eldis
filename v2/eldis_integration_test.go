@@ -3,7 +3,6 @@ package eldis
 import (
 	"bytes"
 	"context"
-	"github.com/vitpelekhaty/go-eldis/v2/responses/readings/raw"
 	"os"
 	"testing"
 	"time"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/vitpelekhaty/go-eldis/v2/responses"
 	"github.com/vitpelekhaty/go-eldis/v2/responses/points"
+	"github.com/vitpelekhaty/go-eldis/v2/responses/readings/raw"
 )
 
 var (
