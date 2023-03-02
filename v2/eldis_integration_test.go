@@ -3,6 +3,7 @@ package eldis
 import (
 	"bytes"
 	"context"
+	"github.com/vitpelekhaty/go-eldis/v2/responses/readings/raw"
 	"os"
 	"testing"
 	"time"
@@ -71,7 +72,7 @@ func TestConnection_ListForDevelopment(t *testing.T) {
 
 func TestConnection_NormalizedReadings(t *testing.T) {
 	to := time.Now()
-	from := to.Add(-time.Hour * 24 * 7)
+	from := to.Add(-time.Hour * 24 * 2)
 
 	ctx, cancelFunc := context.WithTimeout(context.TODO(), time.Second*30)
 
@@ -100,7 +101,7 @@ func TestConnection_NormalizedReadings(t *testing.T) {
 
 func TestConnection_RawReadings(t *testing.T) {
 	to := time.Now()
-	from := to.Add(-time.Hour * 24 * 7)
+	from := to.Add(-time.Hour * 24 * 2)
 
 	ctx, cancelFunc := context.WithTimeout(context.TODO(), time.Second*30)
 
@@ -117,12 +118,42 @@ func TestConnection_RawReadings(t *testing.T) {
 	}()
 
 	t.Run("hour_archive", func(t *testing.T) {
-		_, err = conn.RawReadings(ctx, pointID, HourArchive, from, to)
+		b, err := conn.RawReadings(ctx, pointID, HourArchive, from, to)
 		require.NoError(t, err)
+
+		sb := responses.Extract(responses.SectionRaw, bytes.NewBuffer(b))
+		require.NotEqual(t, 0, len(sb))
+
+		items, err := raw.Parse(context.Background(), bytes.NewReader(sb))
+		require.NoError(t, err)
+
+		var count int
+
+		for item := range items {
+			require.NoError(t, item.E, "item", item)
+			count++
+		}
+
+		require.NotEqual(t, 0, count)
 	})
 
 	t.Run("daily_archive", func(t *testing.T) {
-		_, err = conn.RawReadings(ctx, pointID, DailyArchive, from, to)
+		b, err := conn.RawReadings(ctx, pointID, DailyArchive, from, to)
 		require.NoError(t, err)
+
+		sb := responses.Extract(responses.SectionRaw, bytes.NewBuffer(b))
+		require.NotEqual(t, 0, len(sb))
+
+		items, err := raw.Parse(context.Background(), bytes.NewReader(sb))
+		require.NoError(t, err)
+
+		var count int
+
+		for item := range items {
+			require.NoError(t, item.E, "item", item)
+			count++
+		}
+
+		require.NotEqual(t, 0, count)
 	})
 }
