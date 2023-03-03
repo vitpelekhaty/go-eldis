@@ -9,7 +9,7 @@ import (
 // Item элемент списка точек учета
 type Item struct {
 	// P точка учета
-	P Point
+	P IPoint
 
 	// E ошибка чтения свойств точки учета
 	E error
@@ -75,10 +75,10 @@ func Parse(ctx context.Context, reader io.Reader) (<-chan *Item, error) {
 					return
 				}
 
-				var point Point
+				var props properties
 
-				if err := decoder.Decode(&point); err == nil {
-					out <- &Item{P: point}
+				if err := decoder.Decode(&props); err == nil {
+					out <- &Item{P: &point{properties: &props}}
 				} else {
 					out <- &Item{E: err}
 				}
