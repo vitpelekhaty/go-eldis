@@ -23,8 +23,8 @@ const (
 	PointStatusWithoutAutoReading
 )
 
-// IPoint интерфейс точки учета
-type IPoint interface {
+// Point интерфейс точки учета
+type Point interface {
 	// ID возвращает идентификатор точки учёта
 	ID() string
 
@@ -80,7 +80,7 @@ type IPoint interface {
 	InputConfiguration() (int, bool)
 }
 
-var _ IPoint = (*point)(nil)
+var _ Point = (*point)(nil)
 
 type point struct {
 	properties *properties

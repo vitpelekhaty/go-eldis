@@ -9,7 +9,7 @@ import (
 // Item элемент списка точек учета
 type Item struct {
 	// P точка учета
-	P IPoint
+	P Point
 
 	// E ошибка чтения свойств точки учета
 	E error
