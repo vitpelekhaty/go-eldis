@@ -11,6 +11,7 @@ import (
 
 	"github.com/vitpelekhaty/go-eldis/v2/responses"
 	"github.com/vitpelekhaty/go-eldis/v2/responses/points"
+	"github.com/vitpelekhaty/go-eldis/v2/responses/readings/normalized"
 	"github.com/vitpelekhaty/go-eldis/v2/responses/readings/raw"
 )
 
@@ -89,13 +90,105 @@ func TestConnection_NormalizedReadings(t *testing.T) {
 	}()
 
 	t.Run("hour_archive", func(t *testing.T) {
-		_, err = conn.NormalizedReadings(ctx, pointID, HourArchive, from, to, Date)
+		b, err := conn.NormalizedReadings(ctx, pointID, HourArchive, from, to, Date)
 		require.NoError(t, err)
+
+		buff := bytes.NewBuffer(b)
+
+		t.Run("hot_water", func(t *testing.T) {
+			sb := responses.Extract(responses.SectionNormalizedHotWater, buff)
+
+			if len(sb) > 0 {
+				items, err := normalized.ParseHotWaterReadings(context.Background(), bytes.NewReader(sb))
+				require.NoError(t, err)
+
+				var count int
+
+				for item := range items {
+					require.NoError(t, item.E, "item", item)
+
+					_, ok := item.HotWaterReadings()
+					require.Equal(t, true, ok, "item", item)
+
+					count++
+				}
+
+				require.NotEqual(t, 0, count)
+			}
+		})
+
+		t.Run("heat", func(t *testing.T) {
+			sb := responses.Extract(responses.SectionNormalizedHeat, buff)
+
+			if len(sb) > 0 {
+				items, err := normalized.ParseHeatReadings(context.Background(), bytes.NewReader(sb))
+				require.NoError(t, err)
+
+				var count int
+
+				for item := range items {
+					require.NoError(t, item.E, "item", item)
+
+					_, ok := item.HeatReadings()
+					require.Equal(t, true, ok, "item", item)
+
+					count++
+				}
+
+				require.NotEqual(t, 0, count)
+			}
+		})
 	})
 
 	t.Run("daily_archive", func(t *testing.T) {
-		_, err = conn.NormalizedReadings(ctx, pointID, DailyArchive, from, to, Date)
+		b, err := conn.NormalizedReadings(ctx, pointID, DailyArchive, from, to, Date)
 		require.NoError(t, err)
+
+		buff := bytes.NewBuffer(b)
+
+		t.Run("hot_water", func(t *testing.T) {
+			sb := responses.Extract(responses.SectionNormalizedHotWater, buff)
+
+			if len(sb) > 0 {
+				items, err := normalized.ParseHotWaterReadings(context.Background(), bytes.NewReader(sb))
+				require.NoError(t, err)
+
+				var count int
+
+				for item := range items {
+					require.NoError(t, item.E, "item", item)
+
+					_, ok := item.HotWaterReadings()
+					require.Equal(t, true, ok, "item", item)
+
+					count++
+				}
+
+				require.NotEqual(t, 0, count)
+			}
+		})
+
+		t.Run("heat", func(t *testing.T) {
+			sb := responses.Extract(responses.SectionNormalizedHeat, buff)
+
+			if len(sb) > 0 {
+				items, err := normalized.ParseHeatReadings(context.Background(), bytes.NewReader(sb))
+				require.NoError(t, err)
+
+				var count int
+
+				for item := range items {
+					require.NoError(t, item.E, "item", item)
+
+					_, ok := item.HeatReadings()
+					require.Equal(t, true, ok, "item", item)
+
+					count++
+				}
+
+				require.NotEqual(t, 0, count)
+			}
+		})
 	})
 }
 

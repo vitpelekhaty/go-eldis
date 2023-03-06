@@ -76,7 +76,7 @@ type ColdWaterReadings interface {
 	P() (float64, bool)
 }
 
-// HotWaterReadings нормализованные данные по ГВС
+// HotWaterReadings нормализованные данные по горячему водоснабжению
 type HotWaterReadings interface {
 	Readings
 
